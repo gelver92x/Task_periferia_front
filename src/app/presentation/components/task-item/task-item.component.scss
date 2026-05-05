@@ -34,6 +34,7 @@
 
 .task-row__select {
   min-height: 32px;
+  min-width: 0;
   color: var(--text-primary);
   background: var(--bg-primary);
   border: 1px solid var(--border-subtle);
@@ -52,6 +53,7 @@
   background: transparent;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
+  white-space: nowrap;
 }
 
 .task-row__button:hover {
@@ -71,6 +73,12 @@
   }
 
   .task-row__actions {
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .task-row__select,
+  .task-row__button {
+    width: 100%;
   }
 }
