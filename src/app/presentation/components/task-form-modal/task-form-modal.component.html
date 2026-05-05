@@ -1,0 +1,43 @@
+@if (open()) {
+  <div class="task-form-backdrop" role="presentation" (click)="cancelled.emit()">
+    <form class="task-form" [formGroup]="form" (ngSubmit)="submit()" (click)="$event.stopPropagation()">
+      <header class="task-form__header">
+        <h2>{{ task() ? 'Edit task' : 'New task' }}</h2>
+      </header>
+
+      <label class="task-form__field">
+        <span>Title</span>
+        <input type="text" formControlName="title" maxlength="100" />
+        @if (form.controls.title.touched && form.controls.title.invalid) {
+          <small>Title must be between 3 and 100 characters.</small>
+        }
+      </label>
+
+      <label class="task-form__field">
+        <span>Description</span>
+        <textarea rows="4" formControlName="description" maxlength="500"></textarea>
+        @if (form.controls.description.touched && form.controls.description.invalid) {
+          <small>Description must be 500 characters or less.</small>
+        }
+      </label>
+
+      <label class="task-form__field">
+        <span>Status</span>
+        <select formControlName="status">
+          @for (status of statuses; track status) {
+            <option [value]="status">{{ status }}</option>
+          }
+        </select>
+      </label>
+
+      <footer class="task-form__actions">
+        <button class="task-form__button task-form__button--ghost" type="button" (click)="cancelled.emit()">
+          Cancel
+        </button>
+        <button class="task-form__button" type="submit">
+          {{ task() ? 'Save' : 'Create' }}
+        </button>
+      </footer>
+    </form>
+  </div>
+}

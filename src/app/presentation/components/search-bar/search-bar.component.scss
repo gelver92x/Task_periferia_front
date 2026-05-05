@@ -1,0 +1,26 @@
+.search {
+  display: grid;
+  gap: 6px;
+}
+
+.search__label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.search__input {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 12px;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  outline: none;
+}
+
+.search__input:focus {
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}

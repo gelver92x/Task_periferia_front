@@ -1,0 +1,82 @@
+.task-form-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 42;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(3, 3, 8, 0.74);
+}
+
+.task-form {
+  width: min(100%, 520px);
+  padding: 18px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-active);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
+}
+
+.task-form__header h2 {
+  font-size: 16px;
+}
+
+.task-form__field {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.task-form__field span {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.task-form__field input,
+.task-form__field textarea,
+.task-form__field select {
+  width: 100%;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.task-form__field input,
+.task-form__field select {
+  min-height: 38px;
+  padding: 0 10px;
+}
+
+.task-form__field textarea {
+  resize: vertical;
+  padding: 10px;
+}
+
+.task-form__field small {
+  color: var(--danger);
+}
+
+.task-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.task-form__button {
+  min-height: 36px;
+  padding: 0 14px;
+  color: var(--text-primary);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+}
+
+.task-form__button--ghost {
+  color: var(--text-secondary);
+  background: transparent;
+  border-color: var(--border-active);
+}

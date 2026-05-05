@@ -1,0 +1,76 @@
+.task-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 150px auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.task-row:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.task-row__main {
+  min-width: 0;
+}
+
+.task-row__main h3 {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-row__main p {
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-row__select {
+  min-height: 32px;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.task-row__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.task-row__button {
+  min-height: 32px;
+  padding: 0 10px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.task-row__button:hover {
+  color: var(--text-primary);
+  border-color: var(--border-active);
+}
+
+.task-row__button--danger:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+@media (max-width: 760px) {
+  .task-row {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .task-row__actions {
+    justify-content: flex-end;
+  }
+}
