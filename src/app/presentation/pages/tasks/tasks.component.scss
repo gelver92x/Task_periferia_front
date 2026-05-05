@@ -37,6 +37,7 @@
   padding: 0 14px;
   color: var(--text-primary);
   border-radius: var(--radius-sm);
+  white-space: nowrap;
 }
 
 .tasks-page__primary {
@@ -58,9 +59,22 @@
 }
 
 @media (max-width: 680px) {
+  .tasks-page {
+    padding: 18px 10px;
+  }
+
   .tasks-page__header,
   .tasks-page__toolbar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .tasks-page__header h1 {
+    font-size: 21px;
+  }
+
+  .tasks-page__primary,
+  .tasks-page__secondary {
+    width: 100%;
   }
 }

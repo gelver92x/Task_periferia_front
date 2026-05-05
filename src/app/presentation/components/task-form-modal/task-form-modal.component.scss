@@ -80,3 +80,14 @@
   background: transparent;
   border-color: var(--border-active);
 }
+
+@media (max-width: 520px) {
+  .task-form {
+    padding: 14px;
+  }
+
+  .task-form__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

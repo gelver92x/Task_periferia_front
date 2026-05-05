@@ -62,3 +62,11 @@
 .toast--warning .toast__indicator {
   background: var(--warning);
 }
+
+@media (max-width: 520px) {
+  .toast-stack {
+    right: 10px;
+    bottom: 10px;
+    width: calc(100vw - 20px);
+  }
+}

@@ -58,3 +58,14 @@
   background: var(--danger);
   border-color: var(--danger);
 }
+
+@media (max-width: 420px) {
+  .confirm-modal__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .confirm-modal__button {
+    width: 100%;
+  }
+}
