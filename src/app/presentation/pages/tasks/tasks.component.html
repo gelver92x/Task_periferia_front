@@ -1,0 +1,55 @@
+<main class="tasks-page app-shell">
+  <section class="tasks-page__inner">
+    <header class="tasks-page__header">
+      <div>
+        <h1>Task Manager</h1>
+        <p>Track work items with a compact operational view.</p>
+      </div>
+      <button class="tasks-page__primary" type="button" (click)="openCreateForm()">New task</button>
+    </header>
+
+    <app-stats-counter
+      [total]="facade.totalTasks()"
+      [pending]="facade.pendingTasks()"
+      [inProgress]="facade.inProgressTasks()"
+      [done]="facade.doneTasks()"
+    />
+
+    <section class="tasks-page__toolbar">
+      <app-search-bar (queryChange)="facade.setSearchQuery($event)" />
+      <button class="tasks-page__secondary" type="button" (click)="facade.loadTasks()">Refresh</button>
+    </section>
+
+    @if (facade.error()) {
+      <section class="tasks-page__error">
+        {{ facade.error() }}
+      </section>
+    }
+
+    <app-task-list
+      [tasks]="facade.filteredTasks()"
+      (edit)="openEditForm($event)"
+      (delete)="requestDelete($event)"
+      (statusChange)="changeStatus($event)"
+    />
+  </section>
+
+  <app-task-form-modal
+    [open]="formOpen()"
+    [task]="editingTask()"
+    (saved)="saveTask($event)"
+    (cancelled)="closeForm()"
+  />
+
+  <app-confirm-modal
+    [open]="!!taskPendingDelete()"
+    title="Delete task"
+    [message]="'Delete ' + (taskPendingDelete()?.title ?? 'this task') + '?'"
+    confirmLabel="Delete"
+    [destructive]="true"
+    (confirmed)="confirmDelete()"
+    (cancelled)="taskPendingDelete.set(null)"
+  />
+
+  <app-loading-spinner [active]="facade.loading()" label="Syncing tasks" />
+</main>

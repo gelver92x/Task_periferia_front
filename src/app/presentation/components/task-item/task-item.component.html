@@ -1,0 +1,21 @@
+<article class="task-row">
+  <div class="task-row__main">
+    <h3>{{ task().title }}</h3>
+    <p>{{ task().description || 'No description' }}</p>
+  </div>
+
+  <app-task-status-badge [status]="task().status" />
+
+  <select class="task-row__select" [value]="task().status" (change)="onStatusChange($event)" aria-label="Change status">
+    @for (status of statuses; track status) {
+      <option [value]="status">{{ status }}</option>
+    }
+  </select>
+
+  <div class="task-row__actions">
+    <button class="task-row__button" type="button" (click)="edit.emit(task())">Edit</button>
+    <button class="task-row__button task-row__button--danger" type="button" (click)="delete.emit(task())">
+      Delete
+    </button>
+  </div>
+</article>

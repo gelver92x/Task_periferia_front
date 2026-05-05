@@ -1,0 +1,17 @@
+<section class="task-list" aria-label="Tasks">
+  @if (tasks().length > 0) {
+    @for (task of tasks(); track task.id) {
+      <app-task-item
+        [task]="task"
+        (edit)="edit.emit($event)"
+        (delete)="delete.emit($event)"
+        (statusChange)="statusChange.emit($event)"
+      />
+    }
+  } @else {
+    <div class="task-list__empty">
+      <h3>No tasks found</h3>
+      <p>Create a task or adjust the search filter.</p>
+    </div>
+  }
+</section>
