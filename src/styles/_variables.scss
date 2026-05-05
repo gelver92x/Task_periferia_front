@@ -1,0 +1,31 @@
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-surface: #13131c;
+  --bg-elevated: #1a1a26;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-active: rgba(255, 255, 255, 0.15);
+
+  --accent: #7c3aed;
+  --accent-glow: rgba(124, 58, 237, 0.2);
+  --accent-hover: #6d28d9;
+
+  --status-pending: #6b7280;
+  --status-in-progress: #d97706;
+  --status-done: #059669;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+
+  --danger: #ef4444;
+  --success: #22c55e;
+  --warning: #f59e0b;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --shadow-subtle: 0 10px 30px rgba(0, 0, 0, 0.28);
+  --font-sans:
+    Inter, "Space Grotesk", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+

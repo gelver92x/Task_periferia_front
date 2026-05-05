@@ -1,1 +1,28 @@
-/* You can add global styles to this file, and also import other style files */
+@use "styles/variables";
+@use "styles/reset";
+@use "styles/typography";
+@use "styles/animations";
+
+body {
+  overflow-x: hidden;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(124, 58, 237, 0.08), transparent 260px),
+    var(--bg-primary);
+}
+
+.surface {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.dense-row {
+  display: grid;
+  align-items: center;
+  min-height: 44px;
+  border-bottom: 1px solid var(--border-subtle);
+}
