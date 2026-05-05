@@ -1,0 +1,43 @@
+.loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 40px;
+  color: var(--text-secondary);
+}
+
+.loading--overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  min-height: 100vh;
+  background: rgba(10, 10, 15, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.loading__spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border-active);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: loading-spin 700ms linear infinite;
+}
+
+.loading__label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading__spinner {
+    animation-duration: 1.4s;
+  }
+}
