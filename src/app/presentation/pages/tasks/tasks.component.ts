@@ -1,8 +1,8 @@
 import { Component, OnInit, effect, inject, signal, viewChild } from '@angular/core';
 
-import { TaskFacade } from '../../../application/use-cases/task.facade';
 import { TaskStatus } from '../../../domain/enums/task-status.enum';
 import { CreateTaskPayload, Task, UpdateTaskPayload } from '../../../domain/models/task.model';
+import { TaskFacade } from '../../state/task.facade';
 import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-modal.component';
 import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';

@@ -1,6 +1,3 @@
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
-
 import { CreateTaskPayload, Task, UpdateTaskPayload } from '../../domain/models/task.model';
 
 export interface PagedTaskResult {
@@ -12,12 +9,9 @@ export interface PagedTaskResult {
 }
 
 export interface TaskRepositoryPort {
-  findPaginated(page: number, limit: number): Observable<PagedTaskResult>;
-  findById(id: string): Observable<Task>;
-  create(payload: CreateTaskPayload): Observable<Task>;
-  update(id: string, payload: UpdateTaskPayload): Observable<Task>;
-  delete(id: string): Observable<void>;
+  findPaginated(page: number, limit: number): Promise<PagedTaskResult>;
+  findById(id: string): Promise<Task>;
+  create(payload: CreateTaskPayload): Promise<Task>;
+  update(id: string, payload: UpdateTaskPayload): Promise<Task>;
+  delete(id: string): Promise<void>;
 }
-
-export const TASK_REPOSITORY = new InjectionToken<TaskRepositoryPort>('TASK_REPOSITORY');
-

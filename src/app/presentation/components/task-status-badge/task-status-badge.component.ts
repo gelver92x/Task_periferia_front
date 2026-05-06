@@ -1,6 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 
-import { TASK_STATUS_LABELS, TaskStatus } from '../../../domain/enums/task-status.enum';
+import { TaskStatus } from '../../../domain/enums/task-status.enum';
+import { TASK_STATUS_LABELS } from '../../view-models/task-status-labels';
 
 @Component({
   selector: 'app-task-status-badge',

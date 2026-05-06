@@ -86,38 +86,42 @@ El frontend aplica **Arquitectura Hexagonal**, separando el dominio de negocio, 
 ### Principio de Dependencias
 
 ```
-presentation  →  application (facade)  →  ports (interfaces)
-infrastructure                          →  ports (implementa)
-domain                                  →  nada externo
+presentation  →  application use cases  →  ports (interfaces)
+infrastructure                           →  ports (implementa)
+domain                                   →  nada externo
 ```
 
-Los componentes de UI nunca llaman directamente a `HttpClient`. Solo acceden al `TaskFacade`. El `TaskFacade` depende de la interfaz `TaskRepositoryPort`, no de la implementación HTTP concreta.
+Los componentes de UI nunca llaman directamente a `HttpClient`. Solo acceden al `TaskFacade`, que vive en presentación y delega en casos de uso pequeños. Los casos de uso dependen de la interfaz `TaskRepositoryPort`, no de la implementación HTTP concreta.
 
 ### Las Cuatro Capas
 
 **1. Domain** (`src/app/domain/`)
 
-Contiene los modelos e interfaces de la aplicación. Sin dependencias de Angular.
+Contiene la entidad de negocio, modelos y enums. Sin dependencias de Angular.
 
+- `task.entity.ts` — entidad con reglas de validación y cambios de estado.
 - `task.model.ts` — interfaces `Task`, `CreateTaskPayload` y `UpdateTaskPayload`.
-- `task-status.enum.ts` — enum `TaskStatus` con las etiquetas en español para la UI.
+- `task-status.enum.ts` — enum `TaskStatus` sin etiquetas visuales.
 
 **2. Application** (`src/app/application/`)
 
-Define los contratos y orquesta la lógica.
+Define los contratos y casos de uso de aplicación.
 
-- `task-repository.port.ts` — interfaz `TaskRepositoryPort` e `InjectionToken`. Define qué operaciones necesita la app sin saber cómo se implementan. También define el tipo `PagedTaskResult` para las respuestas paginadas.
-- `task.facade.ts` — servicio central de la aplicación. Gestiona el estado con signals, expone valores derivados con `computed()`, y ejecuta las operaciones CRUD delegando al repositorio. Es el único punto de acceso al estado para todos los componentes.
+- `task-repository.port.ts` — interfaz `TaskRepositoryPort`. Define qué operaciones necesita la app sin saber cómo se implementan. También define el tipo `PagedTaskResult` para las respuestas paginadas.
+- `*.use-case.ts` — casos de uso independientes para listar, crear, actualizar, eliminar y cambiar estado.
 
 **3. Infrastructure** (`src/app/infrastructure/`)
 
 Implementación concreta del puerto de datos.
 
 - `task-http.repository.ts` — implementa `TaskRepositoryPort` usando `HttpClient`. Es el único archivo que conoce la URL de la API y los parámetros HTTP. Usa `HttpParams` para construir las queries de paginación.
+- `task-repository.token.ts` — token de Angular para conectar el puerto con su adaptador HTTP en el composition root.
 
 **4. Presentation** (`src/app/presentation/`)
 
-Componentes de UI standalone. Reciben datos a través de `input()` y comunican acciones hacia arriba con `output()`. Ningún componente inyecta `HttpClient` ni accede a la URL de la API.
+Componentes de UI standalone y estado de pantalla. Reciben datos a través de `input()` y comunican acciones hacia arriba con `output()`. Ningún componente inyecta `HttpClient` ni accede a la URL de la API.
+
+- `task.facade.ts` — estado reactivo de la pantalla con signals, filtros, loading, errores y notificaciones. Delega el negocio en los casos de uso.
 
 ### Estado Reactivo — Signals vs RxJS
 
@@ -218,20 +222,28 @@ Task_periferia_front/
 ├── src/
 │   ├── app/
 │   │   ├── domain/                          # Sin dependencias de Angular ni librerías externas
+│   │   │   ├── entities/
+│   │   │   │   └── task.entity.ts           # Entidad con reglas de negocio
 │   │   │   ├── models/
 │   │   │   │   └── task.model.ts            # Interfaces Task, CreateTaskPayload, UpdateTaskPayload
 │   │   │   └── enums/
-│   │   │       └── task-status.enum.ts      # enum TaskStatus + TASK_STATUS_LABELS (etiquetas ES)
+│   │   │       └── task-status.enum.ts      # enum TaskStatus
 │   │   │
 │   │   ├── application/
 │   │   │   ├── ports/
-│   │   │   │   └── task-repository.port.ts  # InjectionToken TASK_REPOSITORY + interfaz + PagedTaskResult
+│   │   │   │   └── task-repository.port.ts  # Interfaz TaskRepositoryPort + PagedTaskResult
 │   │   │   └── use-cases/
-│   │   │       └── task.facade.ts           # Estado central: signals, computed, CRUD, paginación
+│   │   │       ├── list-tasks-page.use-case.ts
+│   │   │       ├── create-task.use-case.ts
+│   │   │       ├── update-task.use-case.ts
+│   │   │       ├── delete-task.use-case.ts
+│   │   │       └── change-task-status.use-case.ts
 │   │   │
 │   │   ├── infrastructure/
+│   │   │   ├── composition/
+│   │   │   │   └── task-repository.token.ts # InjectionToken TASK_REPOSITORY
 │   │   │   └── repositories/
-│   │   │       └── task-http.repository.ts  # Implementa TaskRepositoryPort con HttpClient
+│   │   │       └── task-http.repository.ts  # Implementa TaskRepositoryPort con HttpClient - Servicio de infraestructura
 │   │   │
 │   │   ├── presentation/
 │   │   │   ├── pages/
@@ -239,6 +251,10 @@ Task_periferia_front/
 │   │   │   │       ├── tasks.component.ts   # Página principal, inyecta facade, coordina eventos
 │   │   │   │       ├── tasks.component.html # Template: header, stats, filtros, grid, modales
 │   │   │   │       └── tasks.component.scss # Layout page, navbar sticky glassmorphism
+│   │   │   ├── state/
+│   │   │   │   └── task.facade.ts           # Estado reactivo de pantalla
+│   │   │   ├── view-models/
+│   │   │   │   └── task-status-labels.ts    # Labels visuales de estados
 │   │   │   └── components/
 │   │   │       ├── star-field/              # Canvas de partículas — fondo animado global
 │   │   │       ├── task-list/               # Grid 3-2-1 cols, skeleton loader, infinite scroll
@@ -254,7 +270,7 @@ Task_periferia_front/
 │   │   │
 │   │   ├── shared/
 │   │   │   └── services/
-│   │   │       └── notification.service.ts  # Signal con cola de toasts, push/dismiss
+│   │   │       └── notification.service.ts  # Signal con cola de toasts, push/dismiss -- Servicio de notificaciones
 │   │   │
 │   │   ├── app.component.ts                 # Raíz: star-field + router-outlet + toast host
 │   │   ├── app.config.ts                    # provideHttpClient, provideRouter, TASK_REPOSITORY DI
