@@ -1,51 +1,34 @@
-# Gestor de Tareas — Frontend
+# Task Manager — Frontend
 
-SPA Angular 18 para gestión de tareas que consume la **Task Manager API**, construida con **standalone components**, **Signals**, **RxJS** y **Arquitectura Hexagonal** aplicada al frontend.
-
-El diseño visual está inspirado en **Discomaps** — fondo animado de partículas conectadas, cards glassmorphism en grid de 3 columnas, paleta violeta/cian y filtrado por estado tipo tab bar.
+SPA Angular 18 para la gestión de tareas. Construida con **standalone components**, **Angular Signals**, **RxJS** y **Arquitectura Hexagonal** aplicada al frontend.
 
 ---
 
 ## Tabla de Contenidos
 
-1. [Stack Técnico](#stack-técnico)
-2. [Requisitos Previos](#requisitos-previos)
-3. [Instalación y Configuración](#instalación-y-configuración)
-4. [Scripts Disponibles](#scripts-disponibles)
-5. [Funcionalidades](#funcionalidades)
-6. [Arquitectura](#arquitectura)
-7. [Componentes](#componentes)
+1. [Requisitos](#requisitos)
+2. [Instalación](#instalación)
+3. [Scripts](#scripts)
+4. [Funcionalidades](#funcionalidades)
+5. [Arquitectura](#arquitectura)
+6. [Componentes](#componentes)
+7. [Estructura de Carpetas](#estructura-de-carpetas)
 8. [Design System](#design-system)
-9. [Estructura de Carpetas](#estructura-de-carpetas)
-10. [Decisiones de Diseño](#decisiones-de-diseño)
 
 ---
 
-## Stack Técnico
+## Requisitos
 
-| Capa | Tecnología | Versión | Rol |
-|------|-----------|---------|-----|
-| Framework | Angular | ^18.1 | SPA con standalone components |
-| Estado reactivo | Angular Signals | Angular 18 built-in | Estado de UI, filtros y valores computados |
-| Streams asíncronos | RxJS | ~7.8 | HTTP, delay, debounce y operadores reactivos |
-| HTTP | Angular HttpClient | Angular 18 built-in | Comunicación con la API REST |
-| Formularios | ReactiveFormsModule | Angular 18 built-in | Validación declarativa |
-| Estilos | SCSS | — | Design system propio con custom properties CSS |
-| Bundler | Vite (via Angular esbuild) | — | Build rápido basado en esbuild |
+- **Node.js 20+ LTS**
+- **npm 9+**
+- **Task Manager API** corriendo en `http://localhost:3000`
 
 ---
 
-## Requisitos Previos
-
-- **Node.js 18+** (se recomienda 20+ LTS).
-- **Backend Task Manager API** corriendo en `http://localhost:3000`. Ver [`Task_periferia_back/README.md`](../Task_periferia_back/README.md).
-
----
-
-## Instalación y Configuración
+## Instalación
 
 ```bash
-# 1. Entrar al directorio del proyecto
+# 1. Entrar al directorio
 cd Task_periferia_front
 
 # 2. Instalar dependencias
@@ -61,18 +44,18 @@ La aplicación queda disponible en:
 http://localhost:4200
 ```
 
-> **Importante:** El backend debe estar corriendo en `http://localhost:3000` antes de abrir la aplicación.
+> El backend debe estar corriendo antes de abrir la aplicación.
 
 ---
 
-## Scripts Disponibles
+## Scripts
 
 | Script | Descripción |
 |--------|-------------|
-| `npm start` | Inicia el servidor de desarrollo (`ng serve`) |
+| `npm start` | Servidor de desarrollo (`ng serve`) en `http://localhost:4200` |
 | `npm run build` | Genera el bundle de producción en `dist/` |
-| `npm run watch` | Build en modo watch para desarrollo |
-| `npm test` | Ejecuta los tests unitarios con Karma |
+| `npm run watch` | Build en modo watch |
+| `npm test` | Tests unitarios con Karma |
 
 ---
 
@@ -80,218 +63,151 @@ http://localhost:4200
 
 | Funcionalidad | Descripción |
 |--------------|-------------|
-| **Listar tareas en grid** | Grid de 3 columnas (2 en tablet, 1 en móvil) con cards de altura uniforme |
-| **Infinite scroll** | Al llegar al fondo se carga la siguiente página (9 tareas) con delay 3 s y spinner |
-| **Filtrar por estado** | Tabs: Todos / Pendientes / En progreso / Completadas — filtrado reactivo client-side |
-| **Buscar tareas** | Búsqueda instantánea con debounce 300ms sobre las tareas ya cargadas |
-| **Crear tarea** | Formulario reactivo en modal — título, descripción y estado — con validaciones inline |
+| **Listar tareas** | Grid de 3 columnas con cards de altura uniforme (2 en tablet, 1 en móvil) |
+| **Infinite scroll** | Al llegar al fondo del listado, se carga la siguiente página (9 tareas) con un indicador de carga y delay de 3 segundos |
+| **Filtrar por estado** | Barra de tabs: Todos / Pendientes / En progreso / Completadas — filtrado reactivo sin peticiones adicionales al servidor |
+| **Buscar tareas** | Campo de búsqueda con debounce de 300ms sobre las tareas ya cargadas |
+| **Crear tarea** | Modal con formulario reactivo, validaciones inline y limpieza automática al abrir |
 | **Editar tarea** | El mismo modal pre-poblado con los datos de la tarea seleccionada |
-| **Eliminar tarea** | Modal de confirmación antes de eliminar para prevenir clics accidentales |
-| **Skeleton loader** | 9 cards animadas con efecto shimmer durante 5 s en carga inicial |
-| **Spinner "Cargando más"** | Spinner + texto con 3 s de delay al paginar |
-| **Contadores reactivos** | Total, Pendientes, En progreso y Completadas — computed signals |
-| **Toast notifications** | Feedback de éxito y error con auto-dismiss en 3 segundos |
-| **Fondo animado** | Canvas con partículas conectadas tipo network graph (Discomaps) |
-| **Estado vacío** | Mensaje contextual cuando no hay tareas o el filtro no da resultados |
-| **Responsive** | Grid fluido: 3 → 2 → 1 columnas |
+| **Eliminar tarea** | Modal de confirmación antes de ejecutar la eliminación |
+| **Skeleton loader** | 9 cards con animación shimmer durante los primeros 5 segundos de la carga inicial |
+| **Indicador de paginación** | Spinner con texto "Cargando más tareas..." durante cada carga adicional |
+| **Contadores reactivos** | Total, Pendientes, En progreso y Completadas actualizados automáticamente con computed signals |
+| **Toast notifications** | Mensajes de éxito y error con cierre automático tras 3 segundos |
+| **Estado vacío** | Mensaje contextual cuando no hay tareas o el filtro activo no produce resultados |
+| **Responsive** | Grid fluido: 3 columnas (≥900px) → 2 columnas (≥560px) → 1 columna |
 
 ---
 
 ## Arquitectura
 
-La aplicación aplica **Arquitectura Hexagonal al frontend**, separando el dominio, la lógica de aplicación, la infraestructura HTTP y la presentación.
+El frontend aplica **Arquitectura Hexagonal**, separando el dominio de negocio, la lógica de aplicación, la infraestructura HTTP y la presentación visual.
 
-### Diagrama de Dependencias
+### Principio de Dependencias
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│  PRESENTATION                     INFRASTRUCTURE                  │
-│  (Componentes)  ──► TaskFacade  ──► TaskRepositoryPort ──►       │
-│                      │              (interfaz + token DI)         │
-│                      │                    │                       │
-│                      │               TaskHttpRepository           │
-│                      │               (HttpClient → API)          │
-│                      ▼                                            │
-│                 DOMAIN                                            │
-│                 Task (model), TaskStatus (enum)                   │
-└──────────────────────────────────────────────────────────────────┘
+presentation  →  application (facade)  →  ports (interfaces)
+infrastructure                          →  ports (implementa)
+domain                                  →  nada externo
 ```
 
-### Flujo de Datos — Crear Tarea
+Los componentes de UI nunca llaman directamente a `HttpClient`. Solo acceden al `TaskFacade`. El `TaskFacade` depende de la interfaz `TaskRepositoryPort`, no de la implementación HTTP concreta.
+
+### Las Cuatro Capas
+
+**1. Domain** (`src/app/domain/`)
+
+Contiene los modelos e interfaces de la aplicación. Sin dependencias de Angular.
+
+- `task.model.ts` — interfaces `Task`, `CreateTaskPayload` y `UpdateTaskPayload`.
+- `task-status.enum.ts` — enum `TaskStatus` con las etiquetas en español para la UI.
+
+**2. Application** (`src/app/application/`)
+
+Define los contratos y orquesta la lógica.
+
+- `task-repository.port.ts` — interfaz `TaskRepositoryPort` e `InjectionToken`. Define qué operaciones necesita la app sin saber cómo se implementan. También define el tipo `PagedTaskResult` para las respuestas paginadas.
+- `task.facade.ts` — servicio central de la aplicación. Gestiona el estado con signals, expone valores derivados con `computed()`, y ejecuta las operaciones CRUD delegando al repositorio. Es el único punto de acceso al estado para todos los componentes.
+
+**3. Infrastructure** (`src/app/infrastructure/`)
+
+Implementación concreta del puerto de datos.
+
+- `task-http.repository.ts` — implementa `TaskRepositoryPort` usando `HttpClient`. Es el único archivo que conoce la URL de la API y los parámetros HTTP. Usa `HttpParams` para construir las queries de paginación.
+
+**4. Presentation** (`src/app/presentation/`)
+
+Componentes de UI standalone. Reciben datos a través de `input()` y comunican acciones hacia arriba con `output()`. Ningún componente inyecta `HttpClient` ni accede a la URL de la API.
+
+### Estado Reactivo — Signals vs RxJS
+
+| Mecanismo | Cuándo se usa |
+|-----------|---------------|
+| **Signals** | Estado de la lista de tareas, filtro activo, búsqueda, loading, hasMore, contadores |
+| **computed()** | `filteredTasks` (combina búsqueda + filtro de estado), contadores por estado |
+| **RxJS Observables** | Peticiones HTTP (`HttpClient`), debounce de 300ms en la búsqueda, delay de skeleton |
+| **effect()** | Sincronización entre señales (detectar fin de carga inicial para verificar si hace falta paginar) |
+
+### Flujo — Carga Inicial con Skeleton Loader
+
+```
+ngOnInit()
+  → facade.loadTasks()
+    → loadingSignal = true       (task-list muestra 9 skeleton cards)
+    → taskRepository.findPaginated(1, 9).pipe(delay(5000))
+    → API REST: GET /tasks?page=1&limit=9
+    → tasksSignal = data         (9 cards reales reemplazan el skeleton)
+    → loadingSignal = false
+    → effect detecta fin de carga → checkInitialFit()
+      (si el contenido cabe en el viewport sin scroll → carga página 2)
+```
+
+### Flujo — Infinite Scroll
+
+```
+Usuario scrollea hacia el fondo
+  → onWindowScroll() detecta: scrollY + windowH ≥ docH - 280px
+    → facade.loadMoreTasks()
+      → loadingMoreSignal = true  (aparece spinner "Cargando más tareas...")
+      → taskRepository.findPaginated(nextPage, 9).pipe(delay(3000))
+      → API REST: GET /tasks?page=N&limit=9
+      → tasksSignal.update(existing → [...existing, ...newData])
+      → loadingMoreSignal = false
+      → hasMoreSignal = result.hasMore
+```
+
+### Flujo — Crear Tarea
 
 ```
 Usuario → "+ Nueva tarea"
-  │
-  ▼
-tasks.component → openCreateForm() → formOpen.set(true)
-  │
-  ▼
-task-form-modal aparece con formulario limpio (effect observa open())
-  │
-  ▼
-Usuario completa el formulario y hace submit
-  │
-  ▼
-task-form-modal emite (saved) con CreateTaskPayload
-  │
-  ▼
-tasks.component → saveTask(payload) → facade.createTask(payload)
-  │
-  ▼
-TaskFacade → runRequest(repo.create(payload), ...)
-  │
-  ▼
-TaskHttpRepository → HttpClient.post('/tasks', payload) → API REST
-  │
-  ▼ Observable<Task>
-facade: tasksSignal.update([newTask, ...tasks])
-  │
-  ▼
-filteredTasks computed recalcula → nueva card visible en el grid
-  │
-  ▼
-notificationService.success() → toast 3 segundos
+  → tasks.component: formOpen.set(true), editingTask.set(null)
+  → task-form-modal: effect detecta open()=true → form.reset()
+  → Usuario completa el formulario y hace submit
+  → task-form-modal emite (saved) con CreateTaskPayload
+  → tasks.component → facade.createTask(payload)
+  → taskRepository.create(payload) → POST /tasks
+  → tasksSignal.update([newTask, ...tasks])
+  → notificationService.success() → toast 3 segundos
 ```
-
-### Flujo de Datos — Carga Inicial con Skeleton Loader
-
-```
-ngOnInit() → facade.loadTasks()
-  │
-  ▼
-loadingSignal.set(true) → task-list recibe [loading]=true
-  │
-  ▼
-9 skeleton cards con shimmer animado aparecen en el grid
-  │
-  ▼
-taskRepository.findAll().pipe(delay(5000)) → API REST
-  │
-  ▼ Respuesta tras 5 segundos
-tasksSignal.set(tasks) → filteredTasks recalcula
-loadingSignal.set(false) → skeleton desaparece, cards reales aparecen
-```
-
-### Reglas de Arquitectura
-
-- **`domain/`** — Solo interfaces y enums. Sin importaciones de Angular.
-- **`application/ports/`** — Define `TaskRepositoryPort` (interfaz + `InjectionToken`). No importa `HttpClient`.
-- **`infrastructure/repositories/`** — `TaskHttpRepository` implementa el puerto. Es el único lugar que conoce la URL de la API.
-- **`application/use-cases/task.facade.ts`** — Centraliza estado (signals), casos de uso, filtros y notificaciones. Los componentes no llaman directamente a repositorios.
-- **`presentation/`** — Solo componentes UI. Reciben datos via `input()` y emiten eventos via `output()`. No inyectan `HttpClient`.
 
 ---
 
 ## Componentes
 
-### Árbol de Componentes
+### Árbol
 
 ```
 app-root
-├── app-star-field              → Canvas con partículas animadas (fondo global)
-└── tasks.component (página)
-    ├── app-stats-counter       → Contadores por estado (computed signals)
-    ├── app-status-filter-bar   → Tabs: Todos / Pendientes / En progreso / Completadas
-    ├── app-search-bar          → Input con debounce 300ms
-    ├── app-task-list           → Grid de cards (3-2-1 columnas)
-    │   └── app-task-item       → Card individual glassmorphism + acciones
-    │       └── app-task-status-badge → Badge visual del estado
-    ├── app-task-form-modal     → Modal crear/editar (ReactiveForm)
-    └── app-confirm-modal       → Confirmación antes de eliminar
+├── app-star-field              → Canvas con partículas animadas (fondo global, fuera de NgZone)
+├── router-outlet               → Carga tasks.component lazy
+└── app-toast-notification      → Host global de notificaciones
+
+tasks.component (página principal — inyecta TaskFacade)
+├── app-stats-counter           → 4 contadores numéricos (computed signals)
+├── app-status-filter-bar       → Tabs de filtro por estado
+├── app-search-bar              → Input con debounce 300ms
+├── app-task-list               → Grid con skeleton / cards / estado vacío + infinite scroll
+│   └── app-task-item           → Card individual glassmorphism + acciones
+│       └── app-task-status-badge → Badge presentacional del estado
+├── app-task-form-modal         → Modal crear / editar (ReactiveForm)
+└── app-confirm-modal           → Confirmación antes de eliminar
 ```
 
-### Detalle por Componente
+### Responsabilidades
 
 | Componente | Responsabilidad |
 |------------|-----------------|
-| `app-star-field` | Canvas global con 80 partículas conectadas por líneas. Corre en `NgZone.runOutsideAngular()` para no afectar el change detection. |
-| `app-tasks` | Contenedor principal. Inyecta `TaskFacade`. Orquesta los eventos entre componentes. |
-| `app-stats-counter` | Muestra Total / Pendientes / En progreso / Completadas via 4 `input()` numéricos. |
-| `app-status-filter-bar` | Tabs de filtro. Emite `filterChange: FilterOption`. El tab activo se marca con glow violeta. |
-| `app-search-bar` | Input de búsqueda con debounce 300ms via RxJS. Emite `queryChange: string`. |
-| `app-task-list` | Grid 3 columnas. Muestra skeleton cards si `[loading]=true`, cards reales si hay tareas, o estado vacío. |
-| `app-task-item` | Card de 210px de altura fija. Header con badge y fecha, body con título y descripción, footer con Editar y Eliminar. |
-| `app-task-status-badge` | Badge presentacional. Solo recibe `status`. Sin lógica. |
-| `app-task-form-modal` | Modal con `ReactiveForm`. Validaciones inline. Resetea el formulario cada vez que se abre via `effect()` que observa `open()`. |
-| `app-confirm-modal` | Modal genérico de confirmación. Emite `confirmed` o `cancelled`. |
-
----
-
-## Design System
-
-Inspirado en **Discomaps** — dark, vibrante, glassmorphism y fondo animado de partículas.
-
-### Paleta de Colores
-
-```scss
-:root {
-  /* Fondos */
-  --bg-primary:    #07070e;   /* Base — negro profundo */
-  --bg-card:       rgba(18, 16, 32, 0.7);  /* Card glassmorphism */
-  --bg-nav:        rgba(15, 13, 26, 0.85); /* Navbar glassmorphism */
-
-  /* Gradiente de fondo — idéntico a Discomaps */
-  /* radial violeta en top center + cian en esquinas */
-
-  /* Acento */
-  --accent:        #7c3aed;  /* Violeta — botón primario, tabs activos, bordes hover */
-  --accent-glow:   rgba(124, 58, 237, 0.22);
-  --accent-hover:  #6d28d9;
-
-  /* Estados semánticos */
-  --status-pending:     #6b7280;  /* Gris   — Pendiente */
-  --status-in-progress: #d97706;  /* Ámbar  — En progreso */
-  --status-done:        #059669;  /* Verde  — Completado */
-
-  /* Texto */
-  --text-primary:   #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted:     #475569;
-
-  /* Sombras */
-  --shadow-card:   0 4px 24px rgba(0,0,0,0.5);
-  --shadow-accent: 0 0 20px var(--accent-glow), 0 0 60px rgba(124,58,237,0.15);
-
-  /* Glassmorphism */
-  --blur-card:   blur(16px);
-  --blur-nav:    blur(12px);
-  --radius-md:   14px;
-  --radius-sm:   6px;
-}
-```
-
-### Tipografía
-
-- **Fuente**: `Inter` (Google Fonts) → `system-ui` (fallback)
-- **Pesos**: 400 (body), 500 (labels), 600 (títulos y botones)
-- Sin serifa. Sin escalado por viewport. Letter-spacing 0.
-
-### Layout
-
-- **Navbar sticky** glassmorphism con logo, título, subtítulo reactivo y botón primario
-- **Stats counter** en fila horizontal compacta
-- **Tabs de filtro** + barra de búsqueda en la misma fila
-- **Grid de cards**: 3 columnas (desktop) → 2 (≤900px) → 1 (≤560px)
-- Cards de **210px** de altura fija, uniformes
-- **Max-width 1280px** centrado con padding lateral 32px
-
-### Animaciones
-
-- Cards: `fade-in-up` al aparecer, `translateY(-3px)` en hover
-- Skeleton: shimmer horizontal animado con `@keyframes shimmer`
-- Spinner: anillo multi-capa con `@keyframes ring-spin`
-- Partículas: `requestAnimationFrame` fuera de la zona de Angular
-
-### Archivos del Design System
-
-```
-src/styles/
-├── _variables.scss   → Todos los CSS Custom Properties (tokens)
-├── _reset.scss       → Normalización de box-model
-├── _typography.scss  → Fuentes y text-rendering
-├── _animations.scss  → Keyframes globales (fade-in, fade-in-up, slide-up)
-└── styles.scss       → Importa partials, define shell global y clases utilitarias
-```
+| `app-star-field` | Canvas 80 partículas conectadas por líneas. Corre con `NgZone.runOutsideAngular()` para no interferir con el change detection de Angular. |
+| `app-tasks` | Contenedor principal. Inyecta `TaskFacade`. Coordina los modales y delega todas las operaciones al facade. |
+| `app-stats-counter` | Recibe 4 valores numéricos vía `input()`. Sin lógica de estado. |
+| `app-status-filter-bar` | Tabs de filtro. Emite `filterChange` con el estado seleccionado. |
+| `app-search-bar` | Campo de búsqueda. Aplica debounce 300ms con RxJS. Emite `queryChange`. |
+| `app-task-list` | Grid 3-2-1 columnas. Muestra skeleton si `loading=true`, cards si hay tareas, mensaje vacío si no. Gestiona el window scroll para infinite scroll. |
+| `app-task-item` | Card de altura fija (280px). Muestra badge de estado, título, descripción y acciones. Emite `edit` y `delete`. |
+| `app-task-status-badge` | Badge visual. Solo recibe `status`. Sin lógica. |
+| `app-task-form-modal` | Modal con `ReactiveForm`. Validaciones inline. Se auto-limpia al abrirse con `effect()`. |
+| `app-confirm-modal` | Modal genérico. Recibe `title`, `message`, `confirmLabel`. Emite `confirmed` o `cancelled`. |
+| `app-toast-notification` | Muestra hasta 5 toasts simultáneos. Auto-dismiss en 3 segundos con animación de salida. |
 
 ---
 
@@ -301,57 +217,58 @@ src/styles/
 Task_periferia_front/
 ├── src/
 │   ├── app/
-│   │   ├── domain/                          # Sin dependencias de Angular
+│   │   ├── domain/                          # Sin dependencias de Angular ni librerías externas
 │   │   │   ├── models/
 │   │   │   │   └── task.model.ts            # Interfaces Task, CreateTaskPayload, UpdateTaskPayload
 │   │   │   └── enums/
-│   │   │       └── task-status.enum.ts      # enum TaskStatus + TASK_STATUS_LABELS en español
+│   │   │       └── task-status.enum.ts      # enum TaskStatus + TASK_STATUS_LABELS (etiquetas ES)
 │   │   │
 │   │   ├── application/
 │   │   │   ├── ports/
-│   │   │   │   └── task-repository.port.ts  # InjectionToken + interfaz TaskRepositoryPort
+│   │   │   │   └── task-repository.port.ts  # InjectionToken TASK_REPOSITORY + interfaz + PagedTaskResult
 │   │   │   └── use-cases/
-│   │   │       └── task.facade.ts           # Estado (signals), filtros, CRUD, notificaciones
+│   │   │       └── task.facade.ts           # Estado central: signals, computed, CRUD, paginación
 │   │   │
 │   │   ├── infrastructure/
 │   │   │   └── repositories/
 │   │   │       └── task-http.repository.ts  # Implementa TaskRepositoryPort con HttpClient
 │   │   │
 │   │   ├── presentation/
-│   │   │   ├── pages/tasks/
-│   │   │   │   ├── tasks.component.ts
-│   │   │   │   ├── tasks.component.html
-│   │   │   │   └── tasks.component.scss
+│   │   │   ├── pages/
+│   │   │   │   └── tasks/
+│   │   │   │       ├── tasks.component.ts   # Página principal, inyecta facade, coordina eventos
+│   │   │   │       ├── tasks.component.html # Template: header, stats, filtros, grid, modales
+│   │   │   │       └── tasks.component.scss # Layout page, navbar sticky glassmorphism
 │   │   │   └── components/
-│   │   │       ├── star-field/              # Canvas de partículas (fondo global)
-│   │   │       ├── task-list/               # Grid 3-2-1 + skeleton loader
-│   │   │       ├── task-item/               # Card glassmorphism 210px
-│   │   │       ├── task-form-modal/         # Modal crear/editar con ReactiveForm
-│   │   │       ├── task-status-badge/       # Badge presentacional
-│   │   │       ├── status-filter-bar/       # Tabs de filtro por estado
-│   │   │       ├── stats-counter/           # Contadores reactivos
+│   │   │       ├── star-field/              # Canvas de partículas — fondo animado global
+│   │   │       ├── task-list/               # Grid 3-2-1 cols, skeleton loader, infinite scroll
+│   │   │       ├── task-item/               # Card glassmorphism 280px de altura
+│   │   │       ├── task-form-modal/         # Modal crear/editar con ReactiveForm y validaciones
+│   │   │       ├── task-status-badge/       # Badge presentacional del estado
+│   │   │       ├── status-filter-bar/       # Tabs Todos/Pendientes/En progreso/Completadas
+│   │   │       ├── stats-counter/           # 4 contadores por estado
 │   │   │       ├── search-bar/              # Input con debounce 300ms
-│   │   │       ├── confirm-modal/           # Modal de confirmación genérico
-│   │   │       ├── loading-spinner/         # Spinner con anillo + barra de progreso
-│   │   │       └── toast-notification/      # Toasts con auto-dismiss
+│   │   │       ├── confirm-modal/           # Modal de confirmación genérico (eliminar)
+│   │   │       ├── loading-spinner/         # Spinner de carga (uso opcional)
+│   │   │       └── toast-notification/      # Toasts de éxito y error con auto-dismiss
 │   │   │
 │   │   ├── shared/
 │   │   │   └── services/
-│   │   │       └── notification.service.ts
+│   │   │       └── notification.service.ts  # Signal con cola de toasts, push/dismiss
 │   │   │
-│   │   ├── app.component.ts                 # Root: star-field + router-outlet + toast host
-│   │   ├── app.config.ts                    # provideHttpClient, provideRouter, TASK_REPOSITORY
-│   │   └── app.routes.ts                    # Ruta lazy: '' → tasks.component
+│   │   ├── app.component.ts                 # Raíz: star-field + router-outlet + toast host
+│   │   ├── app.config.ts                    # provideHttpClient, provideRouter, TASK_REPOSITORY DI
+│   │   └── app.routes.ts                    # Ruta lazy: '' → TasksComponent
 │   │
 │   ├── environments/
 │   │   └── environment.ts                   # { apiUrl: 'http://localhost:3000' }
 │   │
 │   ├── styles/
-│   │   ├── _variables.scss
-│   │   ├── _reset.scss
-│   │   ├── _typography.scss
-│   │   ├── _animations.scss
-│   │   └── (styles.scss en src/)
+│   │   ├── _variables.scss                  # CSS Custom Properties (tokens de color, tipografía, sombras)
+│   │   ├── _reset.scss                      # Normalización de box-model y márgenes
+│   │   ├── _typography.scss                 # Fuente base, text-rendering, clases de texto
+│   │   ├── _animations.scss                 # Keyframes globales: fade-in, fade-in-up, slide-up
+│   │   └── styles.scss                      # Importa partials y define el fondo degradado global
 │   │
 │   ├── index.html
 │   └── main.ts
@@ -359,45 +276,63 @@ Task_periferia_front/
 ├── angular.json
 ├── package.json
 ├── tsconfig.json
-├── README.md
-└── NOTES.md
+└── README.md
 ```
 
 ---
 
-## Decisiones de Diseño
+## Design System
 
-### ¿Por qué Signals en lugar de solo RxJS?
+El sistema de diseño está definido en `src/styles/_variables.scss` mediante **CSS Custom Properties**. Todos los componentes consumen estos tokens — ningún valor de color, sombra o radio está hardcodeado en los estilos de componente.
 
-Angular Signals son ideales para **estado local de la UI** y **valores derivados (computed)**. `TaskFacade` usa signals para el listado de tareas, el filtro de status activo (`statusFilterSignal`) y la búsqueda de texto (`searchQuerySignal`). El `filteredTasks` computed combina ambos filtros automáticamente sin coordinación manual. RxJS se mantiene donde es natural: HTTP con `HttpClient` y debounce en la barra de búsqueda.
+### Tokens Principales
 
-### ¿Por qué skeleton loader en el grid en lugar de overlay?
+```scss
+:root {
+  /* Fondos */
+  --bg-primary:  #07070e;
+  --bg-card:     rgba(18, 16, 32, 0.70);   /* glassmorphism */
+  --bg-nav:      rgba(15, 13, 26, 0.85);   /* navbar sticky */
 
-El overlay cubre toda la pantalla, incluyendo el header, filtros y búsqueda. Esto es innecesario porque esos elementos no dependen de los datos de las tareas. Con el skeleton loader en el grid, el usuario ve la estructura completa de la app mientras carga y puede interactuar con los filtros.
+  /* Acento */
+  --accent:       #7c3aed;
+  --accent-hover: #6d28d9;
+  --accent-glow:  rgba(124, 58, 237, 0.30);
 
-### ¿Por qué cards de altura fija (210px)?
+  /* Estados semánticos */
+  --status-pending:     #6b7280;
+  --status-in-progress: #f59e0b;
+  --status-done:        #10b981;
 
-La uniformidad visual del grid es prioritaria. Con altura dinámica, las cards sin descripción serían significativamente más pequeñas que las que tienen descripción larga, rompiendo el ritmo visual de la cuadrícula. `overflow: hidden` recorta el exceso limpiamente.
+  /* Texto */
+  --text-primary:   #ffffff;
+  --text-secondary: #c8d4e6;
+  --text-muted:     #a5bddf;
 
-### ¿Por qué el estado se cambia solo desde el modal de edición?
+  /* Radios */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
 
-Tener un selector de estado en la card **y** la opción de cambiar el estado desde el modal de edición es UX redundante — el usuario tiene dos caminos distintos para la misma acción. La card muestra el estado actual via badge (lectura), y el modal es el único punto de escritura. Esto simplifica el modelo mental.
-
-### ¿Por qué InjectionToken para el repositorio?
-
-```typescript
-export const TASK_REPOSITORY = new InjectionToken<TaskRepositoryPort>('TASK_REPOSITORY');
-
-// app.config.ts
-{ provide: TASK_REPOSITORY, useClass: TaskHttpRepository }
+  /* Glassmorphism */
+  --blur-nav:  blur(12px);
+  --blur-card: blur(16px);
+}
 ```
 
-`TaskFacade` inyecta el token, no la clase concreta. En tests, se puede proveer un repositorio in-memory sin tocar el Facade ni los componentes.
+### Tipografía
 
-### ¿Por qué standalone components?
+- **Fuente**: `Inter` → `system-ui` (fallback)
+- **Tamaño base**: `14px`
+- **Pesos**: 400 (body), 500 (labels), 600 (títulos y botones)
+- Sin serifa. `text-rendering: optimizeLegibility`.
 
-Angular 18 con standalone components elimina los NgModules y hace explícito el grafo de dependencias de cada componente directamente en `imports: []`.
+### Animaciones
 
-### ¿Por qué SCSS propio en lugar de Angular Material?
-
-Implementar el design system desde cero con CSS Custom Properties demuestra dominio de SCSS, diseño de sistemas de tokens y conocimiento de cómo Angular gestiona los estilos por componente (`ViewEncapsulation.Emulated`). Una librería UI añadiría peso y opciones innecesarias para este alcance.
+| Animación | Uso |
+|-----------|-----|
+| `fade-in-up` | Cards al aparecer, modales |
+| `shimmer` | Efecto de barrido en skeleton cards |
+| `ring-spin` | Spinner del indicador "Cargando más" |
+| `slide-up` + `slide-out` | Entrada y salida de toasts |
+| `requestAnimationFrame` | Partículas del canvas (fuera de NgZone) |
