@@ -11,36 +11,36 @@ const PAGE_SIZE = 9;
 
 @Injectable({ providedIn: 'root' })
 export class TaskFacade {
-  private readonly taskRepository   = inject(TASK_REPOSITORY);
+  private readonly taskRepository = inject(TASK_REPOSITORY);
   private readonly notificationService = inject(NotificationService);
 
   // ── Estado de datos ──────────────────────────────────────────────
-  private readonly tasksSignal        = signal<Task[]>([]);
-  private readonly loadingSignal      = signal(false);       // carga inicial
-  private readonly loadingMoreSignal  = signal(false);       // paginación
-  private readonly errorSignal        = signal<string | null>(null);
-  private readonly searchQuerySignal  = signal('');
+  private readonly tasksSignal = signal<Task[]>([]);
+  private readonly loadingSignal = signal(false);       // carga inicial
+  private readonly loadingMoreSignal = signal(false);       // paginación
+  private readonly errorSignal = signal<string | null>(null);
+  private readonly searchQuerySignal = signal('');
   private readonly statusFilterSignal = signal<TaskStatus | 'all'>('all');
 
   // ── Estado de paginación ─────────────────────────────────────────
-  private readonly currentPageSignal  = signal(1);
-  private readonly hasMoreSignal      = signal(true);
-  private readonly totalSignal        = signal(0);
+  private readonly currentPageSignal = signal(1);
+  private readonly hasMoreSignal = signal(true);
+  private readonly totalSignal = signal(0);
 
   // ── Superficie pública (solo lectura) ────────────────────────────
-  readonly tasks       = this.tasksSignal.asReadonly();
-  readonly loading     = this.loadingSignal.asReadonly();
+  readonly tasks = this.tasksSignal.asReadonly();
+  readonly loading = this.loadingSignal.asReadonly();
   readonly loadingMore = this.loadingMoreSignal.asReadonly();
-  readonly error       = this.errorSignal.asReadonly();
-  readonly hasMore     = this.hasMoreSignal.asReadonly();
-  readonly totalAll    = this.totalSignal.asReadonly();
+  readonly error = this.errorSignal.asReadonly();
+  readonly hasMore = this.hasMoreSignal.asReadonly();
+  readonly totalAll = this.totalSignal.asReadonly();
   readonly statusFilter = this.statusFilterSignal.asReadonly();
 
   // ── Computed: filtrado client-side sobre las tareas ya cargadas ──
   readonly filteredTasks = computed(() => {
-    const query  = this.searchQuerySignal().trim().toLowerCase();
+    const query = this.searchQuerySignal().trim().toLowerCase();
     const status = this.statusFilterSignal();
-    let list     = this.tasksSignal();
+    let list = this.tasksSignal();
 
     if (status !== 'all') list = list.filter((t) => t.status === status);
     if (!query) return list;
@@ -60,7 +60,7 @@ export class TaskFacade {
     () => this.tasksSignal().filter((t) => t.status === TaskStatus.Done).length
   );
 
-  readonly tasks$   = toObservable(this.tasksSignal);
+  readonly tasks$ = toObservable(this.tasksSignal);
   readonly loading$ = toObservable(this.loadingSignal);
 
   // ── Carga inicial (página 1) con delay de 5 s para el skeleton ───
@@ -70,7 +70,7 @@ export class TaskFacade {
     this.tasksSignal.set([]);
 
     this.runRequest(
-      this.taskRepository.findPaginated(1, PAGE_SIZE).pipe(delay(5000)),
+      this.taskRepository.findPaginated(1, PAGE_SIZE).pipe(delay(2000)),
       {
         success: (result) => {
           this.tasksSignal.set(result.data);

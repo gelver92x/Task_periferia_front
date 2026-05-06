@@ -8,14 +8,13 @@
   margin: 0 auto;
 }
 
-/* ════ HEADER NAVBAR — idéntico a Discomaps ════ */
+/* ════ HEADER NAVBAR — solo brand ════ */
 .tasks-page__header {
   position: sticky;
   top: 0;
   z-index: 40;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
   padding: 14px 20px;
   margin: 0 -20px;
@@ -54,7 +53,7 @@
 }
 
 .tasks-page__header h1 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.3px;
   color: var(--text-primary);
@@ -66,13 +65,49 @@
   color: var(--text-muted);
 }
 
-/* Botón primario del header */
+/* ════ SECTION HEADER — título + boton de acción ════ */
+/* Patrón SaaS: contador a la izquierda, acción primaria a la derecha */
+.tasks-page__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tasks-page__section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.tasks-page__count {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.tasks-page__count-label {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.tasks-page__section-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Botón primario — acción principal de la sección */
 .tasks-page__primary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 36px;
-  padding: 0 16px;
+  height: 34px;
+  padding: 0 14px;
   font-size: 13px;
   font-weight: 600;
   color: #fff;
@@ -80,17 +115,17 @@
   border: 1px solid rgba(167, 139, 250, 0.4);
   border-radius: var(--radius-sm);
   white-space: nowrap;
-  box-shadow: 0 0 16px var(--accent-glow);
+  box-shadow: 0 0 14px var(--accent-glow);
   transition: background-color 150ms ease, box-shadow 150ms ease, transform 120ms ease;
 
   &:hover {
     background: var(--accent-hover);
-    box-shadow: 0 0 24px var(--accent-glow-lg);
+    box-shadow: 0 0 22px var(--accent-glow-lg);
     transform: translateY(-1px);
   }
 
   &:active {
-    transform: scale(0.96);
+    transform: scale(0.97);
   }
 }
 

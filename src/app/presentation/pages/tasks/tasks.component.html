@@ -1,18 +1,15 @@
 <main class="tasks-page app-shell">
   <div class="tasks-page__inner">
 
-    <!-- Navbar glassmorphism — sticky -->
+    <!-- Navbar — solo brand, sin botón de acción -->
     <header class="tasks-page__header">
       <div class="tasks-page__brand">
         <div class="tasks-page__logo" aria-hidden="true">✦</div>
         <div class="tasks-page__brand-info">
           <h1>Gestor de Tareas</h1>
-          <p>{{ facade.totalTasks() }} tarea{{ facade.totalTasks() !== 1 ? 's' : '' }} · vista operacional</p>
+          <p>Vista operacional</p>
         </div>
       </div>
-      <button class="tasks-page__primary" type="button" (click)="openCreateForm()">
-        + Nueva tarea
-      </button>
     </header>
 
     <!-- Stats counter -->
@@ -25,7 +22,29 @@
       />
     </div>
 
-    <!-- Filtros + búsqueda — como Discomaps -->
+    <!-- Section header: título de sección + botón de acción primaria -->
+    <div class="tasks-page__section-header">
+      <div class="tasks-page__section-title">
+        <span class="tasks-page__count">{{ facade.totalTasks() }}</span>
+        <span class="tasks-page__count-label">
+          tarea{{ facade.totalTasks() !== 1 ? 's' : '' }}
+        </span>
+      </div>
+
+      <div class="tasks-page__section-actions">
+        <button
+          id="btn-create-task"
+          class="tasks-page__primary"
+          type="button"
+          (click)="openCreateForm()"
+        >
+          <span aria-hidden="true">+</span>
+          Nueva tarea
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtros + búsqueda -->
     <div class="tasks-page__controls">
       <app-status-filter-bar
         [activeFilter]="facade.statusFilter()"
@@ -34,11 +53,11 @@
       <app-search-bar (queryChange)="facade.setSearchQuery($event)" />
     </div>
 
-        @if (facade.error()) {
-      <div class="tasks-page__error">⚠ {{ facade.error() }}</div>
+    @if (facade.error()) {
+      <div class="tasks-page__error" role="alert">⚠ {{ facade.error() }}</div>
     }
 
-    <!-- Grid de cards: muestra skeletons durante la carga -->
+    <!-- Grid de cards -->
     <app-task-list
       [tasks]="facade.filteredTasks()"
       [loading]="facade.loading()"
@@ -63,7 +82,7 @@
   <app-confirm-modal
     [open]="!!taskPendingDelete()"
     title="Eliminar tarea"
-    [message]="'\u00bfEliminar &quot;' + (taskPendingDelete()?.title ?? 'esta tarea') + '&quot; permanentemente?'"
+    [message]="'¿Eliminar &quot;' + (taskPendingDelete()?.title ?? 'esta tarea') + '&quot; permanentemente?'"
     confirmLabel="Eliminar"
     cancelLabel="Cancelar"
     [destructive]="true"

@@ -28,24 +28,25 @@ import { FilterOption } from '../../components/status-filter-bar/status-filter-b
   styleUrl: './tasks.component.scss',
 })
 export class TasksComponent implements OnInit {
-  protected readonly facade          = inject(TaskFacade);
-  protected readonly formOpen        = signal(false);
-  protected readonly editingTask     = signal<Task | null>(null);
+  protected readonly facade            = inject(TaskFacade);
+  protected readonly formOpen          = signal(false);
+  protected readonly editingTask       = signal<Task | null>(null);
   protected readonly taskPendingDelete = signal<Task | null>(null);
 
   private readonly taskList = viewChild(TaskListComponent);
 
-  ngOnInit(): void {
-    this.facade.loadTasks();
-
-    // Cuando la carga inicial termina, delega al task-list para verificar
-    // si el contenido llena el viewport (si no, carga la siguiente página)
+  constructor() {
+    // effect() requiere un injection context → debe estar en el constructor, no en ngOnInit
     effect(() => {
       const loading = this.facade.loading();
       if (!loading) {
         this.taskList()?.checkInitialFit();
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.facade.loadTasks();
   }
 
   protected openCreateForm(): void {
