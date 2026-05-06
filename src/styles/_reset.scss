@@ -6,13 +6,12 @@
 
 html {
   min-height: 100%;
-  background: var(--bg-primary);
+  /* background definido en styles.scss como gradiente multi-radial */
 }
 
 body {
   min-height: 100%;
   margin: 0;
-  background: var(--bg-primary);
   color: var(--text-primary);
 }
 
@@ -32,4 +31,3 @@ svg {
   display: block;
   max-width: 100%;
 }
-

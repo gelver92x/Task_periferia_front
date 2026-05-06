@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { finalize, Observable } from 'rxjs';
+import { delay, finalize, Observable } from 'rxjs';
 
 import { TASK_REPOSITORY } from '../ports/task-repository.port';
 import { TaskStatus } from '../../domain/enums/task-status.enum';
@@ -18,21 +18,27 @@ export class TaskFacade {
   private readonly loadingSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly searchQuerySignal = signal('');
+  private readonly statusFilterSignal = signal<TaskStatus | 'all'>('all');
 
   readonly tasks = this.tasksSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly searchQuery = this.searchQuerySignal.asReadonly();
+  readonly statusFilter = this.statusFilterSignal.asReadonly();
 
   readonly filteredTasks = computed(() => {
-    const query = this.searchQuerySignal().trim().toLowerCase();
+    const query  = this.searchQuerySignal().trim().toLowerCase();
+    const status = this.statusFilterSignal();
+    let list     = this.tasksSignal();
 
-    if (!query) {
-      return this.tasksSignal();
+    if (status !== 'all') {
+      list = list.filter((task) => task.status === status);
     }
 
-    return this.tasksSignal().filter((task) => {
-      const searchable = `${task.title} ${task.description} ${task.status}`.toLowerCase();
+    if (!query) return list;
+
+    return list.filter((task) => {
+      const searchable = `${task.title} ${task.description ?? ''} ${task.status}`.toLowerCase();
       return searchable.includes(query);
     });
   });
@@ -52,9 +58,10 @@ export class TaskFacade {
   readonly loading$ = toObservable(this.loadingSignal);
 
   loadTasks(): void {
-    this.runRequest(this.taskRepository.findAll(), {
+    // delay de 5 s para mostrar el loader antes de renderizar las tareas
+    this.runRequest(this.taskRepository.findAll().pipe(delay(5000)), {
       success: (tasks) => this.tasksSignal.set(tasks),
-      errorMessage: 'Could not load tasks.',
+      errorMessage: 'No se pudieron cargar las tareas.',
     });
   }
 
@@ -101,6 +108,10 @@ export class TaskFacade {
 
   setSearchQuery(query: string): void {
     this.searchQuerySignal.set(query);
+  }
+
+  setStatusFilter(status: TaskStatus | 'all'): void {
+    this.statusFilterSignal.set(status);
   }
 
   clearError(): void {

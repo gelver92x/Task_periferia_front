@@ -1,84 +1,137 @@
-.task-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 150px auto;
-  align-items: center;
-  gap: 12px;
-  min-height: 58px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.task-row:hover {
-  background: rgba(255, 255, 255, 0.025);
-}
-
-.task-row__main {
-  min-width: 0;
-}
-
-.task-row__main h3 {
-  overflow: hidden;
-  font-size: 14px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.task-row__main p {
-  margin-top: 3px;
-  overflow: hidden;
-  color: var(--text-secondary);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.task-row__select {
-  min-height: 32px;
-  min-width: 0;
-  color: var(--text-primary);
-  background: var(--bg-primary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-}
-
-.task-row__actions {
+/* Card glassmorphism — estilo Discomaps */
+.task-card {
   display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  height: 210px;           /* altura uniforme en todas las cards */
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-card);
+  -webkit-backdrop-filter: var(--blur-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card), var(--shadow-inset);
+  overflow: hidden;        /* clipa contenido que supere la altura */
+  transition:
+    border-color  180ms ease,
+    box-shadow    180ms ease,
+    transform     180ms ease;
+  animation: fade-in-up 220ms ease both;
+
+  &:hover {
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-card), var(--shadow-accent);
+    transform: translateY(-3px);
+  }
+
+  /* Borde superior de color por estado */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    border-radius: 2px;
+    opacity: 0.7;
+    transition: opacity 180ms ease, left 180ms ease, right 180ms ease;
+  }
+
+  &--pending::before    { background: var(--status-pending); }
+  &--in_progress::before { background: var(--status-in-progress); }
+  &--done::before       { background: var(--status-done); }
+
+  &:hover::before {
+    opacity: 1;
+    left: 10px;
+    right: 10px;
+  }
+}
+
+/* position: relative para el ::before */
+.task-card {
+  position: relative;
+}
+
+/* ── Header ── */
+.task-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.task-card__date {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Body ── */
+.task-card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
 }
 
-.task-row__button {
-  min-height: 32px;
-  padding: 0 10px;
-  color: var(--text-secondary);
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  white-space: nowrap;
-}
-
-.task-row__button:hover {
+.task-card__title {
+  font-size: 15px;
+  font-weight: 600;
   color: var(--text-primary);
-  border-color: var(--border-active);
+  line-height: 1.35;
+  word-break: break-word;
 }
 
-.task-row__button--danger:hover {
-  color: var(--danger);
-  border-color: var(--danger);
+.task-card__description {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-@media (max-width: 760px) {
-  .task-row {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
+/* ── Footer simplificado (sin select) ── */
+.task-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.task-card__btn {
+  min-height: 30px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+
+  &--edit {
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-subtle);
+
+    &:hover {
+      color: var(--text-primary);
+      border-color: var(--border-active);
+      background: rgba(255,255,255,0.08);
+    }
   }
 
-  .task-row__actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  &--danger {
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid transparent;
 
-  .task-row__select,
-  .task-row__button {
-    width: 100%;
+    &:hover {
+      color: var(--danger);
+      border-color: rgba(239, 68, 68, 0.35);
+      background: var(--danger-bg);
+    }
   }
 }

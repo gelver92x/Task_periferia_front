@@ -1,31 +1,65 @@
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-surface: #13131c;
-  --bg-elevated: #1a1a26;
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-active: rgba(255, 255, 255, 0.15);
+  /* ─── Fondos ─── */
+  --bg-primary:     #07070e;
+  --bg-surface:     rgba(20, 20, 30, 0.6);
+  --bg-elevated:    rgba(26, 26, 42, 0.85);
+  --bg-nav:         rgba(15, 13, 26, 0.85);
+  --bg-glass:       rgba(20, 20, 30, 0.55);
+  --bg-card:        rgba(18, 16, 32, 0.7);
 
-  --accent: #7c3aed;
-  --accent-glow: rgba(124, 58, 237, 0.2);
-  --accent-hover: #6d28d9;
+  /* ─── Bordes ─── */
+  --border-subtle:  rgba(255, 255, 255, 0.05);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-active:  rgba(255, 255, 255, 0.20);
+  --border-accent:  rgba(124, 58, 237, 0.5);
+  --border-glass:   rgba(255, 255, 255, 0.07);
 
-  --status-pending: #6b7280;
-  --status-in-progress: #d97706;
-  --status-done: #059669;
+  /* ─── Acento violeta Discomaps ─── */
+  --accent:         #7c3aed;
+  --accent-light:   #a855f7;
+  --accent-glow:    rgba(124, 58, 237, 0.30);
+  --accent-glow-lg: rgba(124, 58, 237, 0.50);
+  --accent-hover:   #6d28d9;
+  --accent-muted:   rgba(124, 58, 237, 0.15);
 
-  --text-primary: #f1f5f9;
+  /* ─── Glows de esquina (Discomaps) ─── */
+  --glow-violet: rgba(124, 58, 237, 0.22);
+  --glow-cyan:   rgba(34, 211, 238, 0.10);
+
+  /* ─── Estados ─── */
+  --status-pending:        #6b7280;
+  --status-pending-bg:     rgba(107, 114, 128, 0.15);
+  --status-in-progress:    #f59e0b;
+  --status-in-progress-bg: rgba(245, 158, 11, 0.15);
+  --status-done:           #10b981;
+  --status-done-bg:        rgba(16, 185, 129, 0.15);
+
+  /* ─── Texto ─── */
+  --text-primary:   #e2e8f0;
   --text-secondary: #94a3b8;
-  --text-muted: #475569;
+  --text-muted:     #475569;
 
-  --danger: #ef4444;
-  --success: #22c55e;
-  --warning: #f59e0b;
+  /* ─── Feedback ─── */
+  --danger:         #ef4444;
+  --danger-bg:      rgba(239, 68, 68, 0.12);
+  --success:        #10b981;
+  --warning:        #f59e0b;
 
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --shadow-subtle: 0 10px 30px rgba(0, 0, 0, 0.28);
-  --font-sans:
-    Inter, "Space Grotesk", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  /* ─── Radios ─── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* ─── Sombras ─── */
+  --shadow-card:    0 4px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border-glass);
+  --shadow-accent:  0 0 20px var(--accent-glow), 0 0 60px rgba(124,58,237,0.15);
+  --shadow-inset:   inset 0 1px 0 rgba(255,255,255,0.05);
+
+  /* ─── Blur ─── */
+  --blur-nav:   blur(12px);
+  --blur-card:  blur(16px);
+  --blur-modal: blur(20px);
+
+  /* ─── Tipografía ─── */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
-

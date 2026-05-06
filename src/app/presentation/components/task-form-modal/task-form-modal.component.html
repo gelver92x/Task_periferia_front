@@ -1,41 +1,58 @@
 @if (open()) {
   <div class="task-form-backdrop" role="presentation" (click)="cancelled.emit()">
-    <form class="task-form" [formGroup]="form" (ngSubmit)="submit()" (click)="$event.stopPropagation()">
+    <form
+      class="task-form"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      (click)="$event.stopPropagation()"
+      aria-label="Formulario de tarea"
+    >
       <header class="task-form__header">
-        <h2>{{ task() ? 'Edit task' : 'New task' }}</h2>
+        <h2>{{ task() ? 'Editar tarea' : 'Nueva tarea' }}</h2>
       </header>
 
       <label class="task-form__field">
-        <span>Title</span>
-        <input type="text" formControlName="title" maxlength="100" />
+        <span>Título</span>
+        <input
+          type="text"
+          formControlName="title"
+          maxlength="100"
+          placeholder="Título de la tarea..."
+          autocomplete="off"
+        />
         @if (form.controls.title.touched && form.controls.title.invalid) {
-          <small>Title must be between 3 and 100 characters.</small>
+          <small>El título debe tener entre 3 y 100 caracteres.</small>
         }
       </label>
 
       <label class="task-form__field">
-        <span>Description</span>
-        <textarea rows="4" formControlName="description" maxlength="500"></textarea>
+        <span>Descripción <em style="opacity:.5;font-style:normal">(opcional)</em></span>
+        <textarea
+          rows="3"
+          formControlName="description"
+          maxlength="500"
+          placeholder="Agrega una descripción..."
+        ></textarea>
         @if (form.controls.description.touched && form.controls.description.invalid) {
-          <small>Description must be 500 characters or less.</small>
+          <small>La descripción no puede superar los 500 caracteres.</small>
         }
       </label>
 
       <label class="task-form__field">
-        <span>Status</span>
+        <span>Estado</span>
         <select formControlName="status">
-          @for (status of statuses; track status) {
-            <option [value]="status">{{ status }}</option>
-          }
+          <option value="pending">Pendiente</option>
+          <option value="in_progress">En progreso</option>
+          <option value="done">Completado</option>
         </select>
       </label>
 
       <footer class="task-form__actions">
         <button class="task-form__button task-form__button--ghost" type="button" (click)="cancelled.emit()">
-          Cancel
+          Cancelar
         </button>
-        <button class="task-form__button" type="submit">
-          {{ task() ? 'Save' : 'Create' }}
+        <button class="task-form__button task-form__button--primary" type="submit">
+          {{ task() ? 'Guardar cambios' : 'Crear tarea' }}
         </button>
       </footer>
     </form>

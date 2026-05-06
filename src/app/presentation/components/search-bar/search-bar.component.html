@@ -1,4 +1,10 @@
 <label class="search">
-  <span class="search__label">Search tasks</span>
-  <input class="search__input" type="search" [formControl]="searchControl" placeholder="Title, description, status" />
+  <span class="search__icon" aria-hidden="true">⌕</span>
+  <input
+    class="search__input"
+    type="search"
+    [formControl]="searchControl"
+    placeholder="Buscar tareas..."
+    aria-label="Buscar tareas por título, descripción o estado"
+  />
 </label>

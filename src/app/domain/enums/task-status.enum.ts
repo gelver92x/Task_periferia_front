@@ -5,8 +5,8 @@ export enum TaskStatus {
 }
 
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
-  [TaskStatus.Pending]: 'Pending',
-  [TaskStatus.InProgress]: 'In progress',
-  [TaskStatus.Done]: 'Done',
+  [TaskStatus.Pending]:    'Pendiente',
+  [TaskStatus.InProgress]: 'En progreso',
+  [TaskStatus.Done]:       'Completado',
 };
 

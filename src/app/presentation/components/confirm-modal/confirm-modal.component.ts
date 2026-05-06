@@ -9,10 +9,10 @@ import { Component, input, output } from '@angular/core';
 })
 export class ConfirmModalComponent {
   readonly open = input(false);
-  readonly title = input('Confirm action');
-  readonly message = input('This action cannot be undone.');
-  readonly confirmLabel = input('Confirm');
-  readonly cancelLabel = input('Cancel');
+  readonly title = input('Confirmar acción');
+  readonly message = input('Esta acción no se puede deshacer.');
+  readonly confirmLabel = input('Confirmar');
+  readonly cancelLabel = input('Cancelar');
   readonly destructive = input(false);
 
   readonly confirmed = output<void>();

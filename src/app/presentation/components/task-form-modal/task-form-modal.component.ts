@@ -35,13 +35,18 @@ export class TaskFormModalComponent {
 
   constructor() {
     effect(() => {
-      const task = this.task();
+      // Observar open() para que el effect se dispare al abrir el modal,
+      // no solo cuando cambia la tarea (si task=null->null el effect no se re-ejecutaba)
+      const isOpen = this.open();
+      const task   = this.task();
 
-      this.form.reset({
-        title: task?.title ?? '',
-        description: task?.description ?? '',
-        status: task?.status ?? TaskStatus.Pending,
-      });
+      if (isOpen) {
+        this.form.reset({
+          title:       task?.title       ?? '',
+          description: task?.description ?? '',
+          status:      task?.status      ?? TaskStatus.Pending,
+        });
+      }
     });
   }
 

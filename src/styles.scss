@@ -3,19 +3,135 @@
 @use "styles/typography";
 @use "styles/animations";
 
+/* ══════════════════════════════════════════════════════════════
+   FONDO BASE — gradiente idéntico a Discomaps
+   ══════════════════════════════════════════════════════════════ */
+html,
 body {
+  background:
+    radial-gradient(ellipse 100% 60% at 50% 0%,   rgba(100, 50, 230, 0.45) 0%, transparent 65%),
+    radial-gradient(ellipse 60%  80% at 0%   60%,  rgba(34, 211, 238, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 60%  80% at 100% 60%,  rgba(34, 211, 238, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 40%  40% at 100% 0%,   rgba(80, 40, 200, 0.20)  0%, transparent 50%),
+    #07070e;
+  min-height: 100vh;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SHELL  — contenedor transparente sobre el canvas
+   ══════════════════════════════════════════════════════════════ */
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  background: transparent;
   overflow-x: hidden;
 }
 
-button,
-input,
-select,
-textarea {
+/* Todo el contenido de la app encima del canvas (z:0) */
+.app-shell > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CARD BASE — glassmorphism como en Discomaps
+   ══════════════════════════════════════════════════════════════ */
+.card {
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-card);
+  -webkit-backdrop-filter: var(--blur-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card), var(--shadow-inset);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+
+  &:hover {
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-card), var(--shadow-accent);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BOTONES GLOBALES
+   ══════════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  cursor: pointer;
   transition:
-    border-color 150ms ease,
     background-color 150ms ease,
-    color 150ms ease,
-    box-shadow 150ms ease;
+    border-color     150ms ease,
+    box-shadow       150ms ease,
+    transform        120ms ease;
+
+  &:active { transform: scale(0.96); }
+}
+
+.btn-primary {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: #fff;
+  box-shadow: 0 0 0 0 var(--accent-glow);
+
+  &:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 0 18px var(--accent-glow), 0 0 40px rgba(124,58,237,0.2);
+  }
+}
+
+.btn-ghost {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+
+  &:hover {
+    border-color: var(--border-active);
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.07);
+  }
+}
+
+.btn-danger {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+
+  &:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: var(--danger-bg);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   INPUTS
+   ══════════════════════════════════════════════════════════════ */
+input,
+textarea,
+select {
+  background: rgba(7, 7, 14, 0.7);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+  &::placeholder { color: var(--text-muted); }
+
+  &:hover { border-color: var(--border-active); }
+
+  &:focus {
+    border-color: var(--accent-light);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
 }
 
 button:focus-visible,
@@ -23,32 +139,15 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
   outline: none;
-  border-color: var(--border-active);
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-.app-shell {
-  min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(124, 58, 237, 0.08), transparent 260px),
-    var(--bg-primary);
-}
-
-.surface {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-}
-
-.dense-row {
-  display: grid;
-  align-items: center;
-  min-height: 44px;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-@media (max-width: 520px) {
-  .app-shell {
-    background: var(--bg-primary);
-  }
+/* ══════════════════════════════════════════════════════════════
+   UTILITARIOS
+   ══════════════════════════════════════════════════════════════ */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

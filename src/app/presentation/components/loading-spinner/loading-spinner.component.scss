@@ -1,43 +1,101 @@
-.loading {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 40px;
-  color: var(--text-secondary);
-}
-
+/* Overlay de pantalla completa */
 .loading--overlay {
   position: fixed;
   inset: 0;
   z-index: 45;
-  min-height: 100vh;
-  background: rgba(10, 10, 15, 0.72);
-  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 7, 14, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: fade-in 200ms ease;
 }
 
-.loading__spinner {
-  width: 22px;
-  height: 22px;
-  border: 2px solid var(--border-active);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: loading-spin 700ms linear infinite;
+.loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Caja centrada del contenido */
+.loading__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ── Anillo giratorio estilo premium ── */
+.loading__ring {
+  position: relative;
+  width: 56px;
+  height: 56px;
+
+  div {
+    position: absolute;
+    inset: 0;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    animation: ring-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+
+    &:nth-child(1) {
+      border-top-color: var(--accent-light);
+      animation-delay: -0.45s;
+    }
+    &:nth-child(2) {
+      border-top-color: var(--accent);
+      animation-delay: -0.30s;
+    }
+    &:nth-child(3) {
+      border-top-color: rgba(124, 58, 237, 0.4);
+      animation-delay: -0.15s;
+    }
+    &:nth-child(4) {
+      border-top-color: rgba(124, 58, 237, 0.15);
+    }
+  }
+}
+
+/* Etiqueta */
 .loading__label {
   font-size: 13px;
   font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-@keyframes loading-spin {
-  to {
-    transform: rotate(360deg);
-  }
+/* Barra de progreso — 5 segundos exact */
+.loading__progress {
+  width: 160px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loading__progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 100%);
+  border-radius: 2px;
+  animation: progress-fill 5s linear forwards;
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* Keyframes */
+@keyframes ring-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes progress-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .loading__spinner {
-    animation-duration: 1.4s;
-  }
+  .loading__ring div { animation-duration: 2.5s; }
+  .loading__progress-bar { animation-duration: 5s; }
 }

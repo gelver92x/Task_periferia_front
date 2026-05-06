@@ -7,8 +7,10 @@ import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-mo
 import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
 import { StatsCounterComponent } from '../../components/stats-counter/stats-counter.component';
+import { StatusFilterBarComponent } from '../../components/status-filter-bar/status-filter-bar.component';
 import { TaskFormModalComponent } from '../../components/task-form-modal/task-form-modal.component';
 import { TaskListComponent } from '../../components/task-list/task-list.component';
+import { FilterOption } from '../../components/status-filter-bar/status-filter-bar.component';
 
 @Component({
   selector: 'app-tasks',
@@ -18,6 +20,7 @@ import { TaskListComponent } from '../../components/task-list/task-list.componen
     LoadingSpinnerComponent,
     SearchBarComponent,
     StatsCounterComponent,
+    StatusFilterBarComponent,
     TaskFormModalComponent,
     TaskListComponent,
   ],
@@ -25,9 +28,9 @@ import { TaskListComponent } from '../../components/task-list/task-list.componen
   styleUrl: './tasks.component.scss',
 })
 export class TasksComponent implements OnInit {
-  protected readonly facade = inject(TaskFacade);
-  protected readonly formOpen = signal(false);
-  protected readonly editingTask = signal<Task | null>(null);
+  protected readonly facade          = inject(TaskFacade);
+  protected readonly formOpen        = signal(false);
+  protected readonly editingTask     = signal<Task | null>(null);
   protected readonly taskPendingDelete = signal<Task | null>(null);
 
   ngOnInit(): void {
@@ -51,13 +54,11 @@ export class TasksComponent implements OnInit {
 
   protected saveTask(payload: CreateTaskPayload | UpdateTaskPayload): void {
     const task = this.editingTask();
-
     if (task) {
       this.facade.updateTask(task.id, payload);
     } else {
       this.facade.createTask(payload as CreateTaskPayload);
     }
-
     this.closeForm();
   }
 
@@ -67,15 +68,15 @@ export class TasksComponent implements OnInit {
 
   protected confirmDelete(): void {
     const task = this.taskPendingDelete();
-
-    if (task) {
-      this.facade.deleteTask(task.id);
-    }
-
+    if (task) this.facade.deleteTask(task.id);
     this.taskPendingDelete.set(null);
   }
 
   protected changeStatus(event: { task: Task; status: TaskStatus }): void {
     this.facade.changeTaskStatus(event.task, event.status);
+  }
+
+  protected onFilterChange(filter: FilterOption): void {
+    this.facade.setStatusFilter(filter);
   }
 }

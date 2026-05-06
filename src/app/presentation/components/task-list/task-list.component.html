@@ -1,5 +1,23 @@
-<section class="task-list" aria-label="Tasks">
-  @if (tasks().length > 0) {
+<section class="task-grid" aria-label="Tareas">
+
+  @if (loading()) {
+    <!-- Skeleton cards durante la carga — misma estructura que las cards reales -->
+    @for (s of skeletons; track $index) {
+      <div class="task-grid__skeleton" aria-hidden="true">
+        <div class="skeleton-header">
+          <div class="skeleton-block skeleton-badge"></div>
+          <div class="skeleton-block skeleton-date"></div>
+        </div>
+        <div class="skeleton-block skeleton-title"></div>
+        <div class="skeleton-block skeleton-desc"></div>
+        <div class="skeleton-block skeleton-desc skeleton-desc--short"></div>
+        <div class="skeleton-footer">
+          <div class="skeleton-block skeleton-btn"></div>
+          <div class="skeleton-block skeleton-btn"></div>
+        </div>
+      </div>
+    }
+  } @else if (tasks().length > 0) {
     @for (task of tasks(); track task.id) {
       <app-task-item
         [task]="task"
@@ -9,9 +27,11 @@
       />
     }
   } @else {
-    <div class="task-list__empty">
-      <h3>No tasks found</h3>
-      <p>Create a task or adjust the search filter.</p>
+    <div class="task-grid__empty">
+      <p class="task-grid__empty-icon" aria-hidden="true">✦</p>
+      <h3>Sin tareas</h3>
+      <p>Crea una tarea o ajusta el filtro.</p>
     </div>
   }
+
 </section>

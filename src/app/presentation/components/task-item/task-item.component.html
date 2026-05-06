@@ -1,21 +1,39 @@
-<article class="task-row">
-  <div class="task-row__main">
-    <h3>{{ task().title }}</h3>
-    <p>{{ task().description || 'No description' }}</p>
-  </div>
+<article class="task-card" [class]="'task-card--' + task().status">
 
-  <app-task-status-badge [status]="task().status" />
-
-  <select class="task-row__select" [value]="task().status" (change)="onStatusChange($event)" aria-label="Change status">
-    @for (status of statuses; track status) {
-      <option [value]="status">{{ status }}</option>
+  <!-- Header: badge de estado + fecha -->
+  <header class="task-card__header">
+    <app-task-status-badge [status]="task().status" />
+    @if (task().createdAt) {
+      <time class="task-card__date">{{ task().createdAt | date: 'dd MMM' }}</time>
     }
-  </select>
+  </header>
 
-  <div class="task-row__actions">
-    <button class="task-row__button" type="button" (click)="edit.emit(task())">Edit</button>
-    <button class="task-row__button task-row__button--danger" type="button" (click)="delete.emit(task())">
-      Delete
-    </button>
+  <!-- Cuerpo: título y descripción -->
+  <div class="task-card__body">
+    <h3 class="task-card__title">{{ task().title }}</h3>
+    @if (task().description) {
+      <p class="task-card__description">{{ task().description }}</p>
+    }
   </div>
+
+  <!-- Footer: acciones -->
+  <footer class="task-card__footer">
+    <button
+      class="task-card__btn task-card__btn--edit"
+      type="button"
+      aria-label="Editar tarea"
+      (click)="edit.emit(task())"
+    >
+      Editar
+    </button>
+    <button
+      class="task-card__btn task-card__btn--danger"
+      type="button"
+      aria-label="Eliminar tarea"
+      (click)="delete.emit(task())"
+    >
+      Eliminar
+    </button>
+  </footer>
+
 </article>

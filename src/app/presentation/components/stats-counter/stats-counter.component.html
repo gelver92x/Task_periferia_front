@@ -1,18 +1,18 @@
-<section class="stats" aria-label="Task summary">
+<section class="stats" aria-label="Resumen de tareas">
   <article class="stat">
     <span class="stat__value">{{ total() }}</span>
     <span class="stat__label">Total</span>
   </article>
-  <article class="stat">
+  <article class="stat stat--pending">
     <span class="stat__value">{{ pending() }}</span>
-    <span class="stat__label">Pending</span>
+    <span class="stat__label">Pendientes</span>
   </article>
-  <article class="stat">
+  <article class="stat stat--progress">
     <span class="stat__value">{{ inProgress() }}</span>
-    <span class="stat__label">In progress</span>
+    <span class="stat__label">En progreso</span>
   </article>
-  <article class="stat">
+  <article class="stat stat--done">
     <span class="stat__value">{{ done() }}</span>
-    <span class="stat__label">Done</span>
+    <span class="stat__label">Completadas</span>
   </article>
 </section>
