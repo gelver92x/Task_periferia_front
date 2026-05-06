@@ -1,0 +1,12 @@
+<nav class="filter-bar" role="navigation" aria-label="Filtrar por estado">
+  @for (tab of tabs; track tab.value) {
+    <button
+      class="filter-bar__tab"
+      [class.filter-bar__tab--active]="activeFilter() === tab.value"
+      type="button"
+      (click)="filterChange.emit(tab.value)"
+    >
+      {{ tab.label }}
+    </button>
+  }
+</nav>

@@ -1,0 +1,43 @@
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.filter-bar__tab {
+  min-height: 34px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+
+  &:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--border-active);
+  }
+
+  &--active {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow), 0 0 28px rgba(124, 58, 237, 0.15);
+  }
+}
+
+@media (max-width: 520px) {
+  .filter-bar {
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+}
