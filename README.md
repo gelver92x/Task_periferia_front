@@ -266,13 +266,14 @@ private readonly tasksSignal         = signal<TaskViewModel[]>([]);
 private readonly loadingSignal       = signal(false);
 private readonly errorSignal         = signal<string | null>(null);
 private readonly statusFilterSignal  = signal<TaskStatus | 'all'>('all');
+private readonly statsSignal         = signal<TaskStatsResult>({ pending: 0, inProgress: 0, done: 0 });
 
 // Señales derivadas (computed, solo lectura)
-readonly filteredTasks   = computed(() => { /* búsqueda + filtro por status */ });
+readonly filteredTasks   = computed(() => { /* búsqueda de texto local */ });
 readonly totalTasks      = computed(() => this.totalSignal());
-readonly pendingTasks    = computed(() => /* filter pending */);
-readonly inProgressTasks = computed(() => /* filter in_progress */);
-readonly doneTasks       = computed(() => /* filter done */);
+readonly pendingTasks    = computed(() => this.statsSignal().pending);
+readonly inProgressTasks = computed(() => this.statsSignal().inProgress);
+readonly doneTasks       = computed(() => this.statsSignal().done);
 ```
 
 ---
@@ -283,7 +284,7 @@ Base URL: `http://localhost:3000`
 
 | Método   | Ruta              | Descripción                   | Códigos              |
 |----------|-------------------|-------------------------------|----------------------|
-| `GET`    | `/tasks`          | Lista tareas paginadas        | 200, 500             |
+| `GET`    | `/tasks`          | Lista tareas paginadas (soporta `?status`) | 200, 500             |
 | `GET`    | `/tasks/:id`      | Obtiene una tarea por ID      | 200, 404, 500        |
 | `POST`   | `/tasks`          | Crea una nueva tarea          | 201, 400, 422, 500   |
 | `PUT`    | `/tasks/:id`      | Actualiza una tarea existente | 200, 400, 404, 422, 500 |

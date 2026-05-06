@@ -8,6 +8,7 @@ import { UpdateTaskUseCase } from '../../application/use-cases/update-task.use-c
 import { TaskStatus } from '../../domain/enums/task-status.enum';
 import { NotificationService } from '../../shared/services/notification.service';
 import { TaskFormValue, TaskViewModel } from '../view-models/task.view-model';
+import { TaskStatsResult } from '../../application/models/task-use-case.models';
 
 const PAGE_SIZE = 9;
 const INITIAL_LOADING_DELAY_MS = 2000;
@@ -32,6 +33,7 @@ export class TaskFacade {
   private readonly currentPageSignal = signal(1);
   private readonly hasMoreSignal = signal(true);
   private readonly totalSignal = signal(0);
+  private readonly statsSignal = signal<TaskStatsResult>({ pending: 0, inProgress: 0, done: 0 });
 
   readonly tasks = this.tasksSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
@@ -43,12 +45,7 @@ export class TaskFacade {
 
   readonly filteredTasks = computed(() => {
     const query = this.searchQuerySignal().trim().toLowerCase();
-    const status = this.statusFilterSignal();
-    let list = this.tasksSignal();
-
-    if (status !== 'all') {
-      list = list.filter((task) => task.status === status);
-    }
+    const list = this.tasksSignal();
 
     if (!query) {
       return list;
@@ -60,15 +57,9 @@ export class TaskFacade {
   });
 
   readonly totalTasks = computed(() => this.totalSignal());
-  readonly pendingTasks = computed(
-    () => this.tasksSignal().filter((task) => task.status === TaskStatus.Pending).length,
-  );
-  readonly inProgressTasks = computed(
-    () => this.tasksSignal().filter((task) => task.status === TaskStatus.InProgress).length,
-  );
-  readonly doneTasks = computed(
-    () => this.tasksSignal().filter((task) => task.status === TaskStatus.Done).length,
-  );
+  readonly pendingTasks = computed(() => this.statsSignal().pending);
+  readonly inProgressTasks = computed(() => this.statsSignal().inProgress);
+  readonly doneTasks = computed(() => this.statsSignal().done);
 
   loadTasks(): void {
     this.currentPageSignal.set(1);
@@ -78,11 +69,19 @@ export class TaskFacade {
     void this.runRequest(
       async () => {
         await this.delay(INITIAL_LOADING_DELAY_MS);
-        const result = await this.listTasksPageUseCase.execute({ page: 1, limit: PAGE_SIZE });
+        const filter = this.statusFilterSignal();
+        const result = await this.listTasksPageUseCase.execute({ 
+          page: 1, 
+          limit: PAGE_SIZE,
+          status: filter === 'all' ? undefined : filter
+        });
 
         this.tasksSignal.set(result.data ?? []);
         this.hasMoreSignal.set(result.hasMore ?? false);
         this.totalSignal.set(result.total ?? result.data?.length ?? 0);
+        if (result.stats) {
+          this.statsSignal.set(result.stats);
+        }
         this.currentPageSignal.set(1);
       },
       'No se pudieron cargar las tareas.',
@@ -101,8 +100,14 @@ export class TaskFacade {
     void this.runRequest(
       async () => {
         const task = await this.createTaskUseCase.execute(formValue);
-        this.tasksSignal.update((tasks) => [task, ...tasks]);
+        const filter = this.statusFilterSignal();
+        
+        if (filter === 'all' || filter === task.status) {
+          this.tasksSignal.update((tasks) => [task, ...tasks]);
+        }
+        
         this.totalSignal.update((total) => total + 1);
+        this.incrementStat(task.status, 1);
         this.notificationService.success('Tarea creada.');
       },
       'No se pudo crear la tarea.',
@@ -110,10 +115,25 @@ export class TaskFacade {
   }
 
   updateTask(id: string, formValue: TaskFormValue): void {
+    const oldTask = this.tasksSignal().find(t => t.id === id);
+    const oldStatus = oldTask?.status;
+
     void this.runRequest(
       async () => {
         const updated = await this.updateTaskUseCase.execute({ id, ...formValue });
-        this.replaceTask(updated);
+        
+        if (oldStatus && oldStatus !== updated.status) {
+          this.incrementStat(oldStatus, -1);
+          this.incrementStat(updated.status, 1);
+        }
+
+        const filter = this.statusFilterSignal();
+        if (filter !== 'all' && filter !== updated.status) {
+          this.tasksSignal.update((tasks) => tasks.filter(t => t.id !== id));
+        } else {
+          this.replaceTask(updated);
+        }
+        
         this.notificationService.success('Tarea actualizada.');
       },
       'No se pudo actualizar la tarea.',
@@ -121,11 +141,16 @@ export class TaskFacade {
   }
 
   deleteTask(id: string): void {
+    const taskToDelete = this.tasksSignal().find(t => t.id === id);
+    
     void this.runRequest(
       async () => {
         await this.deleteTaskUseCase.execute({ taskId: id });
         this.tasksSignal.update((tasks) => tasks.filter((task) => task.id !== id));
         this.totalSignal.update((total) => Math.max(0, total - 1));
+        if (taskToDelete) {
+          this.incrementStat(taskToDelete.status, -1);
+        }
         this.notificationService.success('Tarea eliminada.');
       },
       'No se pudo eliminar la tarea.',
@@ -136,7 +161,19 @@ export class TaskFacade {
     void this.runRequest(
       async () => {
         const updated = await this.changeTaskStatusUseCase.execute({ taskId: task.id, status });
-        this.replaceTask(updated);
+        
+        if (task.status !== updated.status) {
+          this.incrementStat(task.status, -1);
+          this.incrementStat(updated.status, 1);
+        }
+
+        const filter = this.statusFilterSignal();
+        if (filter !== 'all' && filter !== updated.status) {
+          this.tasksSignal.update((tasks) => tasks.filter(t => t.id !== task.id));
+        } else {
+          this.replaceTask(updated);
+        }
+        
         this.notificationService.success('Tarea actualizada.');
       },
       'No se pudo actualizar la tarea.',
@@ -148,7 +185,10 @@ export class TaskFacade {
   }
 
   setStatusFilter(status: TaskStatus | 'all'): void {
-    this.statusFilterSignal.set(status);
+    if (this.statusFilterSignal() !== status) {
+      this.statusFilterSignal.set(status);
+      this.loadTasks(); // Reload from backend with new filter
+    }
   }
 
   clearError(): void {
@@ -162,12 +202,20 @@ export class TaskFacade {
 
     try {
       await this.delay(LOAD_MORE_DELAY_MS);
-      const result = await this.listTasksPageUseCase.execute({ page: nextPage, limit: PAGE_SIZE });
+      const filter = this.statusFilterSignal();
+      const result = await this.listTasksPageUseCase.execute({ 
+        page: nextPage, 
+        limit: PAGE_SIZE,
+        status: filter === 'all' ? undefined : filter
+      });
       const newData = result.data ?? [];
 
       this.tasksSignal.update((tasks) => [...tasks, ...newData]);
       this.hasMoreSignal.set(result.hasMore ?? false);
       this.totalSignal.set(result.total ?? this.totalSignal());
+      if (result.stats) {
+        this.statsSignal.set(result.stats);
+      }
       this.currentPageSignal.set(nextPage);
     } catch {
       const message = 'No se pudieron cargar mas tareas.';
@@ -196,6 +244,16 @@ export class TaskFacade {
     this.tasksSignal.update((tasks) =>
       tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
     );
+  }
+
+  private incrementStat(status: TaskStatus, amount: number): void {
+    this.statsSignal.update(stats => {
+      const newStats = { ...stats };
+      if (status === TaskStatus.Pending) newStats.pending = Math.max(0, newStats.pending + amount);
+      if (status === TaskStatus.InProgress) newStats.inProgress = Math.max(0, newStats.inProgress + amount);
+      if (status === TaskStatus.Done) newStats.done = Math.max(0, newStats.done + amount);
+      return newStats;
+    });
   }
 
   private delay(ms: number): Promise<void> {

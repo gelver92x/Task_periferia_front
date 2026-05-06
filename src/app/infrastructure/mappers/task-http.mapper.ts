@@ -21,11 +21,16 @@ export class TaskHttpMapper {
 
   static toPagedResult(dto: PagedTasksApiResponseDto): PagedTaskResult {
     return {
-      data: dto.data.map((task) => this.toDomain(task)),
-      total: dto.total,
-      page: dto.page,
-      limit: dto.limit,
+      data:    dto.data.map((task) => this.toDomain(task)),
+      total:   dto.total,
+      page:    dto.page,
+      limit:   dto.limit,
       hasMore: dto.hasMore,
+      stats: {
+        pending:    dto.stats?.pending    ?? 0,
+        inProgress: dto.stats?.inProgress ?? 0,
+        done:       dto.stats?.done       ?? 0,
+      },
     };
   }
 

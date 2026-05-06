@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { CreateTaskRepositoryInput, PagedTaskResult, TaskRepositoryPort } from '../../application/ports/task-repository.port';
 import { TaskEntity } from '../../domain/entities/task.entity';
+import { TaskStatus } from '../../domain/enums/task-status.enum';
 import { environment } from '../../../environments/environment';
 import { PagedTasksApiResponseDto, TaskApiDto } from '../dto/task-api.dto';
 import { TaskHttpMapper } from '../mappers/task-http.mapper';
@@ -14,10 +15,14 @@ export class TaskHttpRepository implements TaskRepositoryPort {
 
   constructor(private readonly http: HttpClient) {}
 
-  findPaginated(page: number, limit: number): Promise<PagedTaskResult> {
-    const params = new HttpParams()
+  findPaginated(page: number, limit: number, status?: TaskStatus): Promise<PagedTaskResult> {
+    let params = new HttpParams()
       .set('page',  page.toString())
       .set('limit', limit.toString());
+
+    if (status) {
+      params = params.set('status', status);
+    }
 
     return firstValueFrom(this.http.get<PagedTasksApiResponseDto>(this.endpoint, { params })).then((response) =>
       TaskHttpMapper.toPagedResult(response),

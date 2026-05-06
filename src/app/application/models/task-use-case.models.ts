@@ -9,12 +9,19 @@ export type TaskResult = {
   updatedAt: string;
 };
 
+export type TaskStatsResult = {
+  pending:    number;
+  inProgress: number;
+  done:       number;
+};
+
 export type PagedTasksResult = {
-  data: TaskResult[];
-  total: number;
-  page: number;
-  limit: number;
+  data:    TaskResult[];
+  total:   number;
+  page:    number;
+  limit:   number;
   hasMore: boolean;
+  stats:   TaskStatsResult;
 };
 
 export type CreateTaskCommand = {
@@ -40,6 +47,7 @@ export type DeleteTaskCommand = {
 };
 
 export type ListTasksPageQuery = {
-  page: number;
-  limit: number;
+  page:    number;
+  limit:   number;
+  status?: TaskStatus;
 };

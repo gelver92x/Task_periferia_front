@@ -13,7 +13,11 @@ export class ListTasksPageUseCase {
       throw new Error('Limit must be a positive integer.');
     }
 
-    const result: PagedTaskResult = await this.taskRepository.findPaginated(input.page, input.limit);
+    const result: PagedTaskResult = await this.taskRepository.findPaginated(
+      input.page,
+      input.limit,
+      input.status,
+    );
 
     return {
       ...result,

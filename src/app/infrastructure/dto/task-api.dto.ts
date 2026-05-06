@@ -9,12 +9,19 @@ export type TaskApiDto = {
   updatedAt: string;
 };
 
+export type TaskStatsApiDto = {
+  pending:    number;
+  inProgress: number;
+  done:       number;
+};
+
 export type PagedTasksApiResponseDto = {
-  data: TaskApiDto[];
-  total: number;
-  page: number;
-  limit: number;
+  data:    TaskApiDto[];
+  total:   number;
+  page:    number;
+  limit:   number;
   hasMore: boolean;
+  stats:   TaskStatsApiDto;
 };
 
 export type CreateTaskRequestDto = {
