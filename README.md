@@ -1,27 +1,110 @@
-# TaskPeriferiaFront
+# Task Manager App
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.2.
+SPA Angular para gestionar tareas consumiendo la API `Task Manager API`.
 
-## Development server
+## Stack
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- Angular 18
+- Standalone components
+- SCSS
+- Angular Signals
+- RxJS
+- Reactive Forms
+- HttpClient
+- Arquitectura hexagonal en frontend
 
-## Code scaffolding
+## Instalación
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```bash
+npm install
+npm start
+```
 
-## Build
+Aplicación local:
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+```text
+http://localhost:4200
+```
 
-## Running unit tests
+Backend esperado:
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```text
+http://localhost:3000
+```
 
-## Running end-to-end tests
+La URL del backend se configura en:
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+```text
+src/environments/environment.ts
+```
 
-## Further help
+## Scripts
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```bash
+npm run build
+npm start
+npm test
+```
+
+## Funcionalidades
+
+- Listar tareas.
+- Crear tarea.
+- Editar tarea.
+- Eliminar tarea con confirmación.
+- Cambiar estado desde cada fila.
+- Buscar por título, descripción o estado con debounce.
+- Contadores reactivos por estado.
+- Toasts de éxito/error.
+- Overlay de carga.
+
+## Arquitectura
+
+```text
+src/app/
+  domain/
+    enums/
+    models/
+  application/
+    ports/
+    use-cases/
+  infrastructure/
+    repositories/
+  presentation/
+    pages/
+    components/
+  shared/
+    services/
+```
+
+Reglas aplicadas:
+
+- `domain` no depende de Angular.
+- `TaskRepositoryPort` define el contrato de persistencia.
+- `TaskHttpRepository` implementa el puerto con `HttpClient`.
+- `TaskFacade` concentra estado, casos de uso y signals.
+- Los componentes de presentación reciben datos y emiten eventos.
+
+## Design system
+
+Estilo dark, compacto y de alta densidad:
+
+- Fondo principal `#0a0a0f`.
+- Superficies `#13131c`.
+- Acento violeta `#7c3aed`.
+- Bordes sutiles.
+- Radios de 4px a 6px.
+- Tablas/listas densas.
+
+Los tokens viven en:
+
+```text
+src/styles/_variables.scss
+```
+
+## Verificación
+
+```bash
+npm run build
+```
+
