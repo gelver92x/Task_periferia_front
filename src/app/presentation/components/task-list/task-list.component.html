@@ -38,12 +38,9 @@
 
 </section>
 
-<!-- Sentinel para IntersectionObserver — invisible, al fondo del grid -->
+<!-- Indicadores de paginación — fuera del grid para no romper las columnas -->
 @if (!loading()) {
-  <div #sentinel class="task-grid__sentinel" aria-hidden="true"></div>
-
   @if (loadingMore()) {
-    <!-- Indicador "Cargando más tareas..." con spinner y timer de 3 s -->
     <div class="load-more-indicator" role="status" aria-live="polite">
       <div class="load-more-indicator__spinner"></div>
       <span class="load-more-indicator__text">Cargando más tareas...</span>

@@ -81,17 +81,19 @@ http://localhost:4200
 | Funcionalidad | Descripción |
 |--------------|-------------|
 | **Listar tareas en grid** | Grid de 3 columnas (2 en tablet, 1 en móvil) con cards de altura uniforme |
-| **Filtrar por estado** | Tabs: Todos / Pendientes / En progreso / Completadas — filtrado reactivo con Signals |
-| **Buscar tareas** | Búsqueda instantánea con debounce 300ms combinada con el filtro de estado activo |
+| **Infinite scroll** | Al llegar al fondo se carga la siguiente página (9 tareas) con delay 3 s y spinner |
+| **Filtrar por estado** | Tabs: Todos / Pendientes / En progreso / Completadas — filtrado reactivo client-side |
+| **Buscar tareas** | Búsqueda instantánea con debounce 300ms sobre las tareas ya cargadas |
 | **Crear tarea** | Formulario reactivo en modal — título, descripción y estado — con validaciones inline |
 | **Editar tarea** | El mismo modal pre-poblado con los datos de la tarea seleccionada |
 | **Eliminar tarea** | Modal de confirmación antes de eliminar para prevenir clics accidentales |
-| **Skeleton loader** | 9 cards animadas con efecto shimmer durante los primeros 5 segundos de carga |
-| **Contadores reactivos** | Total, Pendientes, En progreso y Completadas — computed signals actualizados automáticamente |
+| **Skeleton loader** | 9 cards animadas con efecto shimmer durante 5 s en carga inicial |
+| **Spinner "Cargando más"** | Spinner + texto con 3 s de delay al paginar |
+| **Contadores reactivos** | Total, Pendientes, En progreso y Completadas — computed signals |
 | **Toast notifications** | Feedback de éxito y error con auto-dismiss en 3 segundos |
-| **Fondo animado** | Canvas con partículas conectadas por líneas estilo network graph (Discomaps) |
+| **Fondo animado** | Canvas con partículas conectadas tipo network graph (Discomaps) |
 | **Estado vacío** | Mensaje contextual cuando no hay tareas o el filtro no da resultados |
-| **Responsive** | Grid fluido a 2 columnas en tablet y 1 en móvil |
+| **Responsive** | Grid fluido: 3 → 2 → 1 columnas |
 
 ---
 

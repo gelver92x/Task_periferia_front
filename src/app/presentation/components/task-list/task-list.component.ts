@@ -1,13 +1,11 @@
 import {
   AfterViewInit,
   Component,
-  ElementRef,
   NgZone,
   OnDestroy,
-  OnInit,
+  inject,
   input,
   output,
-  viewChild,
 } from '@angular/core';
 
 import { TaskStatus } from '../../../domain/enums/task-status.enum';
@@ -24,49 +22,61 @@ import { TaskItemComponent } from '../task-item/task-item.component';
 export class TaskListComponent implements AfterViewInit, OnDestroy {
   // ── Inputs ────────────────────────────────────────────────────────
   readonly tasks       = input.required<Task[]>();
-  readonly loading     = input(false);    // carga inicial → muestra skeleton grid
-  readonly loadingMore = input(false);    // carga de página siguiente
-  readonly hasMore     = input(false);    // hay más páginas disponibles
+  readonly loading     = input(false);
+  readonly loadingMore = input(false);
+  readonly hasMore     = input(false);
 
   // ── Outputs ───────────────────────────────────────────────────────
   readonly edit         = output<Task>();
   readonly delete       = output<Task>();
   readonly statusChange = output<{ task: Task; status: TaskStatus }>();
-  readonly loadMore     = output<void>(); // IntersectionObserver lo dispara
+  readonly loadMore     = output<void>();
 
-  // ── Sentinel para IntersectionObserver ────────────────────────────
-  readonly sentinelRef = viewChild<ElementRef<HTMLDivElement>>('sentinel');
-
-  /** 9 slots para la cuadrícula skeleton 3×3 */
+  /** 9 slots para skeleton 3×3 */
   protected readonly skeletons = Array(9).fill(null);
 
-  private observer: IntersectionObserver | null = null;
-
-  constructor(private readonly zone: NgZone) {}
+  private readonly zone = inject(NgZone);
+  private scrollHandler: (() => void) | null = null;
+  private initialCheckDone = false;   // sólo hacemos el check automático una vez
 
   ngAfterViewInit(): void {
-    this.setupObserver();
+    this.zone.runOutsideAngular(() => {
+      const handler = () => this.onWindowScroll();
+      window.addEventListener('scroll', handler, { passive: true });
+      this.scrollHandler = () => window.removeEventListener('scroll', handler);
+    });
   }
 
   ngOnDestroy(): void {
-    this.observer?.disconnect();
+    this.scrollHandler?.();
   }
 
-  private setupObserver(): void {
-    const el = this.sentinelRef()?.nativeElement;
-    if (!el) return;
+  /**
+   * Llamado por el facade/page cuando termina la carga inicial.
+   * Si los 9 primeros cards NO producen scroll (viewport mayor al contenido),
+   * dispara loadMore UNA SOLA VEZ para dar al usuario algo que desplazar.
+   */
+  checkInitialFit(): void {
+    if (this.initialCheckDone) return;
+    this.initialCheckDone = true;
+    // Pequeño timeout para que el DOM haya pintado las cards
+    setTimeout(() => {
+      const docH    = document.documentElement.scrollHeight;
+      const windowH = window.innerHeight;
+      if (docH <= windowH + 50 && this.hasMore() && !this.loadingMore()) {
+        this.zone.run(() => this.loadMore.emit());
+      }
+    }, 300);
+  }
 
-    this.zone.runOutsideAngular(() => {
-      this.observer = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          if (entry.isIntersecting && !this.loadingMore() && !this.loading()) {
-            this.zone.run(() => this.loadMore.emit());
-          }
-        },
-        { rootMargin: '120px' } // dispara 120px antes del final
-      );
-      this.observer.observe(el);
-    });
+  private onWindowScroll(): void {
+    if (this.loadingMore() || this.loading() || !this.hasMore()) return;
+    const scrollY      = window.scrollY ?? window.pageYOffset;
+    const windowH      = window.innerHeight;
+    const docH         = document.documentElement.scrollHeight;
+    const nearBottom   = scrollY + windowH >= docH - 280;
+    if (nearBottom) {
+      this.zone.run(() => this.loadMore.emit());
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal, viewChild } from '@angular/core';
 
 import { TaskFacade } from '../../../application/use-cases/task.facade';
 import { TaskStatus } from '../../../domain/enums/task-status.enum';
@@ -33,8 +33,19 @@ export class TasksComponent implements OnInit {
   protected readonly editingTask     = signal<Task | null>(null);
   protected readonly taskPendingDelete = signal<Task | null>(null);
 
+  private readonly taskList = viewChild(TaskListComponent);
+
   ngOnInit(): void {
     this.facade.loadTasks();
+
+    // Cuando la carga inicial termina, delega al task-list para verificar
+    // si el contenido llena el viewport (si no, carga la siguiente página)
+    effect(() => {
+      const loading = this.facade.loading();
+      if (!loading) {
+        this.taskList()?.checkInitialFit();
+      }
+    });
   }
 
   protected openCreateForm(): void {
