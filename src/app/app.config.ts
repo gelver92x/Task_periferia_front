@@ -17,6 +17,15 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withFetch()),
     {
+      /*
+      - Cuando alguien pide TASK_REPOSITORY, Angular instancia TaskHttpRepository.
+      - Cuando alguien pide ListTasksPageUseCase, Angular ejecuta el factory y le pasa inject(TASK_REPOSITORY).
+  
+      Entonces realmente esto:
+      new ListTasksPageUseCase(inject(TASK_REPOSITORY))
+      termina siendo equivalente a:
+      new ListTasksPageUseCase(new TaskHttpRepository(httpClient))
+      */
       provide: TASK_REPOSITORY,
       useClass: TaskHttpRepository,
     },

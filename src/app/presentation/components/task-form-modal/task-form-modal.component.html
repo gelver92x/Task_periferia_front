@@ -1,10 +1,9 @@
 @if (open()) {
-  <div class="task-form-backdrop" role="presentation" (click)="cancelled.emit()">
+  <div class="task-form-backdrop" role="presentation">
     <form
       class="task-form"
       [formGroup]="form"
       (ngSubmit)="submit()"
-      (click)="$event.stopPropagation()"
       aria-label="Formulario de tarea"
     >
       <header class="task-form__header">
