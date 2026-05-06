@@ -38,9 +38,9 @@ export class TaskFacade {
 
   // ── Computed: filtrado client-side sobre las tareas ya cargadas ──
   readonly filteredTasks = computed(() => {
-    const query = this.searchQuerySignal().trim().toLowerCase();
+    const query  = this.searchQuerySignal().trim().toLowerCase();
     const status = this.statusFilterSignal();
-    let list = this.tasksSignal();
+    let list     = this.tasksSignal() ?? [];   // ?? [] por si el signal queda undefined
 
     if (status !== 'all') list = list.filter((t) => t.status === status);
     if (!query) return list;
@@ -51,13 +51,13 @@ export class TaskFacade {
 
   readonly totalTasks = computed(() => this.totalSignal());
   readonly pendingTasks = computed(
-    () => this.tasksSignal().filter((t) => t.status === TaskStatus.Pending).length
+    () => (this.tasksSignal() ?? []).filter((t) => t.status === TaskStatus.Pending).length
   );
   readonly inProgressTasks = computed(
-    () => this.tasksSignal().filter((t) => t.status === TaskStatus.InProgress).length
+    () => (this.tasksSignal() ?? []).filter((t) => t.status === TaskStatus.InProgress).length
   );
   readonly doneTasks = computed(
-    () => this.tasksSignal().filter((t) => t.status === TaskStatus.Done).length
+    () => (this.tasksSignal() ?? []).filter((t) => t.status === TaskStatus.Done).length
   );
 
   readonly tasks$ = toObservable(this.tasksSignal);
@@ -73,9 +73,10 @@ export class TaskFacade {
       this.taskRepository.findPaginated(1, PAGE_SIZE).pipe(delay(2000)),
       {
         success: (result) => {
-          this.tasksSignal.set(result.data);
-          this.hasMoreSignal.set(result.hasMore);
-          this.totalSignal.set(result.total);
+          // ?? [] protege si el backend devuelve formato antiguo (sin .data)
+          this.tasksSignal.set(result.data ?? []);
+          this.hasMoreSignal.set(result.hasMore ?? false);
+          this.totalSignal.set(result.total ?? (result.data?.length ?? 0));
           this.currentPageSignal.set(1);
         },
         errorMessage: 'No se pudieron cargar las tareas.',
@@ -99,9 +100,10 @@ export class TaskFacade {
       )
       .subscribe({
         next: (result) => {
-          this.tasksSignal.update((existing) => [...existing, ...result.data]);
-          this.hasMoreSignal.set(result.hasMore);
-          this.totalSignal.set(result.total);
+          const newData = result.data ?? [];
+          this.tasksSignal.update((existing) => [...(existing ?? []), ...newData]);
+          this.hasMoreSignal.set(result.hasMore ?? false);
+          this.totalSignal.set(result.total ?? this.totalSignal());
           this.currentPageSignal.set(nextPage);
         },
         error: () => {

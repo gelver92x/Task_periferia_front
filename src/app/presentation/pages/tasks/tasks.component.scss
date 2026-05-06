@@ -65,34 +65,15 @@
   color: var(--text-muted);
 }
 
-/* ════ SECTION HEADER — título + boton de acción ════ */
-/* Patrón SaaS: contador a la izquierda, acción primaria a la derecha */
+/* ════ SECTION HEADER — stats + acción primaria ════ */
 .tasks-page__section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.tasks-page__section-title {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.tasks-page__count {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.5px;
-  line-height: 1;
-}
-
-.tasks-page__count-label {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text-muted);
+  gap: 24px;
+  margin-bottom: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .tasks-page__section-actions {
@@ -106,8 +87,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 34px;
-  padding: 0 14px;
+  height: 44px;        /* igual que la stats bar */
+  padding: 0 18px;
   font-size: 13px;
   font-weight: 600;
   color: #fff;
@@ -129,9 +110,11 @@
   }
 }
 
-/* ════ STATS BAR ════ */
 .tasks-page__stats {
-  margin-bottom: 20px;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;   /* centra la stats-bar dentro del flex item */
 }
 
 /* ════ CONTROLS: filtros + búsqueda ════ */

@@ -12,23 +12,15 @@
       </div>
     </header>
 
-    <!-- Stats counter -->
-    <div class="tasks-page__stats">
-      <app-stats-counter
-        [total]="facade.totalTasks()"
-        [pending]="facade.pendingTasks()"
-        [inProgress]="facade.inProgressTasks()"
-        [done]="facade.doneTasks()"
-      />
-    </div>
-
-    <!-- Section header: título de sección + botón de acción primaria -->
+    <!-- Section header: stats a la izquierda, acción primaria a la derecha -->
     <div class="tasks-page__section-header">
-      <div class="tasks-page__section-title">
-        <span class="tasks-page__count">{{ facade.totalTasks() }}</span>
-        <span class="tasks-page__count-label">
-          tarea{{ facade.totalTasks() !== 1 ? 's' : '' }}
-        </span>
+      <div class="tasks-page__stats">
+        <app-stats-counter
+          [total]="facade.totalTasks()"
+          [pending]="facade.pendingTasks()"
+          [inProgress]="facade.inProgressTasks()"
+          [done]="facade.doneTasks()"
+        />
       </div>
 
       <div class="tasks-page__section-actions">

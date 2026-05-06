@@ -1,11 +1,13 @@
 .stats {
   display: flex;
   gap: 1px;
-  margin-bottom: 16px;
   background: var(--border-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   overflow: hidden;
+  height: 44px;
+  /* altura fija para alinear con el botón del section-header */
+  width: 600px;
 }
 
 .stat {
@@ -48,9 +50,17 @@
 }
 
 /* Indicadores de color por estado */
-.stat--pending   .stat__value { color: var(--status-pending); }
-.stat--progress  .stat__value { color: var(--status-in-progress); }
-.stat--done      .stat__value { color: var(--status-done); }
+.stat--pending .stat__value {
+  color: var(--status-pending);
+}
+
+.stat--progress .stat__value {
+  color: var(--status-in-progress);
+}
+
+.stat--done .stat__value {
+  color: var(--status-done);
+}
 
 @media (max-width: 640px) {
   .stats {
