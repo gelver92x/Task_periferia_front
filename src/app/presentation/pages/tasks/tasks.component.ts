@@ -79,4 +79,8 @@ export class TasksComponent implements OnInit {
   protected onFilterChange(filter: FilterOption): void {
     this.facade.setStatusFilter(filter);
   }
+
+  protected onLoadMore(): void {
+    this.facade.loadMoreTasks();
+  }
 }

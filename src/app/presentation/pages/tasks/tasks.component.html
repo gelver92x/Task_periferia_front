@@ -42,9 +42,12 @@
     <app-task-list
       [tasks]="facade.filteredTasks()"
       [loading]="facade.loading()"
+      [loadingMore]="facade.loadingMore()"
+      [hasMore]="facade.hasMore()"
       (edit)="openEditForm($event)"
       (delete)="requestDelete($event)"
       (statusChange)="changeStatus($event)"
+      (loadMore)="onLoadMore()"
     />
 
   </div>

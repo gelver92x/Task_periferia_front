@@ -7,93 +7,142 @@ import { TaskStatus } from '../../domain/enums/task-status.enum';
 import { CreateTaskPayload, Task, UpdateTaskPayload } from '../../domain/models/task.model';
 import { NotificationService } from '../../shared/services/notification.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+const PAGE_SIZE = 9;
+
+@Injectable({ providedIn: 'root' })
 export class TaskFacade {
-  private readonly taskRepository = inject(TASK_REPOSITORY);
+  private readonly taskRepository   = inject(TASK_REPOSITORY);
   private readonly notificationService = inject(NotificationService);
 
-  private readonly tasksSignal = signal<Task[]>([]);
-  private readonly loadingSignal = signal(false);
-  private readonly errorSignal = signal<string | null>(null);
-  private readonly searchQuerySignal = signal('');
+  // ── Estado de datos ──────────────────────────────────────────────
+  private readonly tasksSignal        = signal<Task[]>([]);
+  private readonly loadingSignal      = signal(false);       // carga inicial
+  private readonly loadingMoreSignal  = signal(false);       // paginación
+  private readonly errorSignal        = signal<string | null>(null);
+  private readonly searchQuerySignal  = signal('');
   private readonly statusFilterSignal = signal<TaskStatus | 'all'>('all');
 
-  readonly tasks = this.tasksSignal.asReadonly();
-  readonly loading = this.loadingSignal.asReadonly();
-  readonly error = this.errorSignal.asReadonly();
-  readonly searchQuery = this.searchQuerySignal.asReadonly();
+  // ── Estado de paginación ─────────────────────────────────────────
+  private readonly currentPageSignal  = signal(1);
+  private readonly hasMoreSignal      = signal(true);
+  private readonly totalSignal        = signal(0);
+
+  // ── Superficie pública (solo lectura) ────────────────────────────
+  readonly tasks       = this.tasksSignal.asReadonly();
+  readonly loading     = this.loadingSignal.asReadonly();
+  readonly loadingMore = this.loadingMoreSignal.asReadonly();
+  readonly error       = this.errorSignal.asReadonly();
+  readonly hasMore     = this.hasMoreSignal.asReadonly();
+  readonly totalAll    = this.totalSignal.asReadonly();
   readonly statusFilter = this.statusFilterSignal.asReadonly();
 
+  // ── Computed: filtrado client-side sobre las tareas ya cargadas ──
   readonly filteredTasks = computed(() => {
     const query  = this.searchQuerySignal().trim().toLowerCase();
     const status = this.statusFilterSignal();
     let list     = this.tasksSignal();
 
-    if (status !== 'all') {
-      list = list.filter((task) => task.status === status);
-    }
-
+    if (status !== 'all') list = list.filter((t) => t.status === status);
     if (!query) return list;
-
-    return list.filter((task) => {
-      const searchable = `${task.title} ${task.description ?? ''} ${task.status}`.toLowerCase();
-      return searchable.includes(query);
-    });
+    return list.filter((t) =>
+      `${t.title} ${t.description ?? ''} ${t.status}`.toLowerCase().includes(query)
+    );
   });
 
-  readonly totalTasks = computed(() => this.tasksSignal().length);
+  readonly totalTasks = computed(() => this.totalSignal());
   readonly pendingTasks = computed(
-    () => this.tasksSignal().filter((task) => task.status === TaskStatus.Pending).length,
+    () => this.tasksSignal().filter((t) => t.status === TaskStatus.Pending).length
   );
   readonly inProgressTasks = computed(
-    () => this.tasksSignal().filter((task) => task.status === TaskStatus.InProgress).length,
+    () => this.tasksSignal().filter((t) => t.status === TaskStatus.InProgress).length
   );
   readonly doneTasks = computed(
-    () => this.tasksSignal().filter((task) => task.status === TaskStatus.Done).length,
+    () => this.tasksSignal().filter((t) => t.status === TaskStatus.Done).length
   );
 
-  readonly tasks$ = toObservable(this.tasksSignal);
+  readonly tasks$   = toObservable(this.tasksSignal);
   readonly loading$ = toObservable(this.loadingSignal);
 
+  // ── Carga inicial (página 1) con delay de 5 s para el skeleton ───
   loadTasks(): void {
-    // delay de 5 s para mostrar el loader antes de renderizar las tareas
-    this.runRequest(this.taskRepository.findAll().pipe(delay(5000)), {
-      success: (tasks) => this.tasksSignal.set(tasks),
-      errorMessage: 'No se pudieron cargar las tareas.',
-    });
+    this.currentPageSignal.set(1);
+    this.hasMoreSignal.set(true);
+    this.tasksSignal.set([]);
+
+    this.runRequest(
+      this.taskRepository.findPaginated(1, PAGE_SIZE).pipe(delay(5000)),
+      {
+        success: (result) => {
+          this.tasksSignal.set(result.data);
+          this.hasMoreSignal.set(result.hasMore);
+          this.totalSignal.set(result.total);
+          this.currentPageSignal.set(1);
+        },
+        errorMessage: 'No se pudieron cargar las tareas.',
+        isLoadMore: false,
+      }
+    );
+  }
+
+  // ── Carga siguiente página con delay de 3 s ──────────────────────
+  loadMoreTasks(): void {
+    if (this.loadingMoreSignal() || !this.hasMoreSignal()) return;
+
+    const nextPage = this.currentPageSignal() + 1;
+    this.loadingMoreSignal.set(true);
+
+    this.taskRepository
+      .findPaginated(nextPage, PAGE_SIZE)
+      .pipe(
+        delay(3000),
+        finalize(() => this.loadingMoreSignal.set(false))
+      )
+      .subscribe({
+        next: (result) => {
+          this.tasksSignal.update((existing) => [...existing, ...result.data]);
+          this.hasMoreSignal.set(result.hasMore);
+          this.totalSignal.set(result.total);
+          this.currentPageSignal.set(nextPage);
+        },
+        error: () => {
+          const msg = 'No se pudieron cargar más tareas.';
+          this.errorSignal.set(msg);
+          this.notificationService.error(msg);
+        },
+      });
   }
 
   createTask(payload: CreateTaskPayload): void {
     this.runRequest(this.taskRepository.create(payload), {
       success: (task) => {
         this.tasksSignal.update((tasks) => [task, ...tasks]);
-        this.notificationService.success('Task created.');
+        this.totalSignal.update((n) => n + 1);
+        this.notificationService.success('Tarea creada.');
       },
-      errorMessage: 'Could not create task.',
+      errorMessage: 'No se pudo crear la tarea.',
     });
   }
 
   updateTask(id: string, payload: UpdateTaskPayload): void {
     this.runRequest(this.taskRepository.update(id, payload), {
-      success: (updatedTask) => {
+      success: (updated) => {
         this.tasksSignal.update((tasks) =>
-          tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
+          tasks.map((t) => (t.id === updated.id ? updated : t))
         );
-        this.notificationService.success('Task updated.');
+        this.notificationService.success('Tarea actualizada.');
       },
-      errorMessage: 'Could not update task.',
+      errorMessage: 'No se pudo actualizar la tarea.',
     });
   }
 
   deleteTask(id: string): void {
     this.runRequest(this.taskRepository.delete(id), {
       success: () => {
-        this.tasksSignal.update((tasks) => tasks.filter((task) => task.id !== id));
-        this.notificationService.success('Task deleted.');
+        this.tasksSignal.update((tasks) => tasks.filter((t) => t.id !== id));
+        this.totalSignal.update((n) => Math.max(0, n - 1));
+        this.notificationService.success('Tarea eliminada.');
       },
-      errorMessage: 'Could not delete task.',
+      errorMessage: 'No se pudo eliminar la tarea.',
     });
   }
 
@@ -101,29 +150,13 @@ export class TaskFacade {
     this.updateTask(task.id, { status });
   }
 
-  searchTasks(query: string): Task[] {
-    this.searchQuerySignal.set(query);
-    return this.filteredTasks();
-  }
-
-  setSearchQuery(query: string): void {
-    this.searchQuerySignal.set(query);
-  }
-
-  setStatusFilter(status: TaskStatus | 'all'): void {
-    this.statusFilterSignal.set(status);
-  }
-
-  clearError(): void {
-    this.errorSignal.set(null);
-  }
+  setSearchQuery(query: string): void { this.searchQuerySignal.set(query); }
+  setStatusFilter(status: TaskStatus | 'all'): void { this.statusFilterSignal.set(status); }
+  clearError(): void { this.errorSignal.set(null); }
 
   private runRequest<T>(
     request$: Observable<T>,
-    handlers: {
-      success: (value: T) => void;
-      errorMessage: string;
-    },
+    handlers: { success: (value: T) => void; errorMessage: string; isLoadMore?: boolean }
   ): void {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
@@ -137,4 +170,3 @@ export class TaskFacade {
     });
   }
 }
-

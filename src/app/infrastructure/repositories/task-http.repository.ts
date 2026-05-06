@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { TaskRepositoryPort } from '../../application/ports/task-repository.port';
+import { PagedTaskResult, TaskRepositoryPort } from '../../application/ports/task-repository.port';
 import { CreateTaskPayload, Task, UpdateTaskPayload } from '../../domain/models/task.model';
 import { environment } from '../../../environments/environment';
 
@@ -12,8 +12,11 @@ export class TaskHttpRepository implements TaskRepositoryPort {
 
   constructor(private readonly http: HttpClient) {}
 
-  findAll(): Observable<Task[]> {
-    return this.http.get<Task[]>(this.endpoint);
+  findPaginated(page: number, limit: number): Observable<PagedTaskResult> {
+    const params = new HttpParams()
+      .set('page',  page.toString())
+      .set('limit', limit.toString());
+    return this.http.get<PagedTaskResult>(this.endpoint, { params });
   }
 
   findById(id: string): Observable<Task> {
@@ -32,4 +35,3 @@ export class TaskHttpRepository implements TaskRepositoryPort {
     return this.http.delete<void>(`${this.endpoint}/${id}`);
   }
 }
-

@@ -1,7 +1,7 @@
 <section class="task-grid" aria-label="Tareas">
 
   @if (loading()) {
-    <!-- Skeleton cards durante la carga — misma estructura que las cards reales -->
+    <!-- Skeleton cards durante la carga inicial — 3×3 -->
     @for (s of skeletons; track $index) {
       <div class="task-grid__skeleton" aria-hidden="true">
         <div class="skeleton-header">
@@ -17,6 +17,7 @@
         </div>
       </div>
     }
+
   } @else if (tasks().length > 0) {
     @for (task of tasks(); track task.id) {
       <app-task-item
@@ -26,6 +27,7 @@
         (statusChange)="statusChange.emit($event)"
       />
     }
+
   } @else {
     <div class="task-grid__empty">
       <p class="task-grid__empty-icon" aria-hidden="true">✦</p>
@@ -35,3 +37,18 @@
   }
 
 </section>
+
+<!-- Sentinel para IntersectionObserver — invisible, al fondo del grid -->
+@if (!loading()) {
+  <div #sentinel class="task-grid__sentinel" aria-hidden="true"></div>
+
+  @if (loadingMore()) {
+    <!-- Indicador "Cargando más tareas..." con spinner y timer de 3 s -->
+    <div class="load-more-indicator" role="status" aria-live="polite">
+      <div class="load-more-indicator__spinner"></div>
+      <span class="load-more-indicator__text">Cargando más tareas...</span>
+    </div>
+  } @else if (!hasMore() && tasks().length > 0) {
+    <p class="task-grid__end-label">— Has llegado al final —</p>
+  }
+}

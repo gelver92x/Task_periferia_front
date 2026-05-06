@@ -23,7 +23,7 @@
   backdrop-filter: var(--blur-nav);
   -webkit-backdrop-filter: var(--blur-nav);
   border-bottom: 1px solid var(--border-glass);
-  box-shadow: 0 1px 0 rgba(124,58,237,0.15), 0 4px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 1px 0 rgba(124, 58, 237, 0.15), 0 4px 24px rgba(0, 0, 0, 0.4);
   margin-bottom: 28px;
 }
 
@@ -88,7 +88,10 @@
     box-shadow: 0 0 24px var(--accent-glow-lg);
     transform: translateY(-1px);
   }
-  &:active { transform: scale(0.96); }
+
+  &:active {
+    transform: scale(0.96);
+  }
 }
 
 /* ════ STATS BAR ════ */
@@ -127,14 +130,17 @@
   .tasks-page {
     padding: 0 12px 40px;
   }
+
   .tasks-page__header {
     padding: 12px 12px;
     margin: 0 -12px;
     flex-wrap: wrap;
   }
+
   .tasks-page__toolbar {
     flex-direction: column;
   }
+
   .tasks-page__primary {
     width: 100%;
     justify-content: center;
