@@ -1,76 +1,83 @@
 import { TaskStatus } from '../enums/task-status.enum';
-import { CreateTaskPayload, Task, UpdateTaskPayload } from '../models/task.model';
-
-const MIN_TITLE_LENGTH = 3;
-const MAX_TITLE_LENGTH = 100;
-const MAX_DESCRIPTION_LENGTH = 500;
+import { TaskPrimitives } from '../models/task.model';
+import { TaskDescription } from '../value-objects/task-description';
+import { TaskId } from '../value-objects/task-id';
+import { TaskTitle } from '../value-objects/task-title';
 
 export class TaskEntity {
-  private constructor(private readonly props: Task) {}
+  private constructor(
+    readonly id: TaskId,
+    readonly title: TaskTitle,
+    readonly description: TaskDescription,
+    readonly status: TaskStatus,
+    readonly createdAt: string,
+    readonly updatedAt: string,
+  ) {}
 
-  static rehydrate(task: Task): TaskEntity {
-    this.assertValidTitle(task.title);
-    this.assertValidDescription(task.description);
-
-    return new TaskEntity({ ...task });
+  static rehydrate(task: TaskPrimitives): TaskEntity {
+    return new TaskEntity(
+      TaskId.create(task.id),
+      TaskTitle.create(task.title),
+      TaskDescription.create(task.description),
+      task.status,
+      task.createdAt,
+      task.updatedAt,
+    );
   }
 
-  static prepareCreate(payload: CreateTaskPayload): CreateTaskPayload {
-    const title = payload.title.trim();
-    const description = payload.description?.trim();
-
-    this.assertValidTitle(title);
-    this.assertValidDescription(description ?? '');
-
+  static prepareCreation(input: {
+    title: string;
+    description?: string;
+    status?: TaskStatus;
+  }): { title: string; description: string; status: TaskStatus } {
     return {
-      title,
-      description,
-      status: payload.status ?? TaskStatus.Pending,
+      title: TaskTitle.create(input.title).value,
+      description: TaskDescription.create(input.description).value,
+      status: input.status ?? TaskStatus.Pending,
     };
   }
 
-  static prepareUpdate(payload: UpdateTaskPayload): UpdateTaskPayload {
-    const update: UpdateTaskPayload = {};
+  rename(title: string): TaskEntity {
+    return new TaskEntity(
+      this.id,
+      TaskTitle.create(title),
+      this.description,
+      this.status,
+      this.createdAt,
+      this.updatedAt,
+    );
+  }
 
-    if (payload.title !== undefined) {
-      const title = payload.title.trim();
-      this.assertValidTitle(title);
-      update.title = title;
-    }
-
-    if (payload.description !== undefined) {
-      const description = payload.description.trim();
-      this.assertValidDescription(description);
-      update.description = description;
-    }
-
-    if (payload.status !== undefined) {
-      update.status = payload.status;
-    }
-
-    return update;
+  updateDescription(description: string | undefined): TaskEntity {
+    return new TaskEntity(
+      this.id,
+      this.title,
+      TaskDescription.create(description),
+      this.status,
+      this.createdAt,
+      this.updatedAt,
+    );
   }
 
   changeStatus(status: TaskStatus): TaskEntity {
-    return new TaskEntity({
-      ...this.props,
+    return new TaskEntity(
+      this.id,
+      this.title,
+      this.description,
       status,
-    });
+      this.createdAt,
+      this.updatedAt,
+    );
   }
 
-  toPrimitives(): Task {
-    return { ...this.props };
-  }
-
-  private static assertValidTitle(title: string): void {
-    if (title.length < MIN_TITLE_LENGTH || title.length > MAX_TITLE_LENGTH) {
-      throw new Error(`Task title must contain between ${MIN_TITLE_LENGTH} and ${MAX_TITLE_LENGTH} characters.`);
-    }
-  }
-
-  private static assertValidDescription(description: string): void {
-    if (description.length > MAX_DESCRIPTION_LENGTH) {
-      throw new Error(`Task description must contain ${MAX_DESCRIPTION_LENGTH} characters or fewer.`);
-    }
+  toPrimitives(): TaskPrimitives {
+    return {
+      id: this.id.value,
+      title: this.title.value,
+      description: this.description.value,
+      status: this.status,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }

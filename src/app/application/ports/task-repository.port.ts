@@ -1,17 +1,24 @@
-import { CreateTaskPayload, Task, UpdateTaskPayload } from '../../domain/models/task.model';
+import { TaskEntity } from '../../domain/entities/task.entity';
+import { TaskStatus } from '../../domain/enums/task-status.enum';
 
 export interface PagedTaskResult {
-  data:    Task[];
+  data:    TaskEntity[];
   total:   number;
   page:    number;
   limit:   number;
   hasMore: boolean;
 }
 
+export type CreateTaskRepositoryInput = {
+  title: string;
+  description: string;
+  status: TaskStatus;
+};
+
 export interface TaskRepositoryPort {
   findPaginated(page: number, limit: number): Promise<PagedTaskResult>;
-  findById(id: string): Promise<Task>;
-  create(payload: CreateTaskPayload): Promise<Task>;
-  update(id: string, payload: UpdateTaskPayload): Promise<Task>;
+  findById(id: string): Promise<TaskEntity | null>;
+  create(input: CreateTaskRepositoryInput): Promise<TaskEntity>;
+  update(task: TaskEntity): Promise<TaskEntity>;
   delete(id: string): Promise<void>;
 }

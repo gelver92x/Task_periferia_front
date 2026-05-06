@@ -1,354 +1,301 @@
 # Task Manager — Frontend
 
-SPA Angular 18 para la gestión de tareas. Construida con **standalone components**, **Angular Signals**, **RxJS** y **Arquitectura Hexagonal** aplicada al frontend.
+SPA Angular para gestión de tareas que consume una REST API. Permite listar, crear, editar, eliminar, filtrar y cambiar el estado de tareas con una interfaz dark y minimalista.
 
 ---
 
-## Tabla de Contenidos
+## Stack
 
-1. [Requisitos](#requisitos)
-2. [Instalación](#instalación)
-3. [Scripts](#scripts)
-4. [Funcionalidades](#funcionalidades)
-5. [Arquitectura](#arquitectura)
-6. [Componentes](#componentes)
-7. [Estructura de Carpetas](#estructura-de-carpetas)
-8. [Design System](#design-system)
+| Tecnología | Versión |
+|---|---|
+| Angular | 18.1 |
+| TypeScript | 5.5 |
+| RxJS | 7.8 |
+| Angular Signals | integrado en Angular 18 |
+| Reactive Forms | integrado en Angular 18 |
+| Karma + Jasmine | 6.4 / 5.1 |
+| SCSS | — |
 
 ---
 
 ## Requisitos
 
-- **Node.js 20+ LTS**
-- **npm 9+**
-- **Task Manager API** corriendo en `http://localhost:3000`
+- **Node.js** 20 LTS o superior
+- **npm** 9 o superior
+- Backend ejecutándose en `http://localhost:3000`
+
+La URL base de la API se configura en:
+
+```
+src/environments/environment.ts
+```
 
 ---
 
-## Instalación
+## Instalación y ejecución
 
 ```bash
-# 1. Entrar al directorio
-cd Task_periferia_front
-
-# 2. Instalar dependencias
+# Instalar dependencias
 npm install
 
-# 3. Iniciar el servidor de desarrollo
+# Servidor de desarrollo (http://localhost:4200)
 npm start
-```
 
-La aplicación queda disponible en:
+# Build de producción
+npm run build
 
-```
-http://localhost:4200
-```
+# Pruebas unitarias (modo watch)
+npm test
 
-> El backend debe estar corriendo antes de abrir la aplicación.
+# Pruebas unitarias sin watch (CI)
+npm test -- --watch=false --browsers=ChromeHeadless
+```
 
 ---
 
-## Scripts
+## Scripts disponibles
 
-| Script | Descripción |
-|--------|-------------|
-| `npm start` | Servidor de desarrollo (`ng serve`) en `http://localhost:4200` |
-| `npm run build` | Genera el bundle de producción en `dist/` |
-| `npm run watch` | Build en modo watch |
-| `npm test` | Tests unitarios con Karma |
-
----
-
-## Funcionalidades
-
-| Funcionalidad | Descripción |
-|--------------|-------------|
-| **Listar tareas** | Grid de 3 columnas con cards de altura uniforme (2 en tablet, 1 en móvil) |
-| **Infinite scroll** | Al llegar al fondo del listado, se carga la siguiente página (9 tareas) con un indicador de carga y delay de 3 segundos |
-| **Filtrar por estado** | Barra de tabs: Todos / Pendientes / En progreso / Completadas — filtrado reactivo sin peticiones adicionales al servidor |
-| **Buscar tareas** | Campo de búsqueda con debounce de 300ms sobre las tareas ya cargadas |
-| **Crear tarea** | Modal con formulario reactivo, validaciones inline y limpieza automática al abrir |
-| **Editar tarea** | El mismo modal pre-poblado con los datos de la tarea seleccionada |
-| **Eliminar tarea** | Modal de confirmación antes de ejecutar la eliminación |
-| **Skeleton loader** | 9 cards con animación shimmer durante los primeros 5 segundos de la carga inicial |
-| **Indicador de paginación** | Spinner con texto "Cargando más tareas..." durante cada carga adicional |
-| **Contadores reactivos** | Total, Pendientes, En progreso y Completadas actualizados automáticamente con computed signals |
-| **Toast notifications** | Mensajes de éxito y error con cierre automático tras 3 segundos |
-| **Estado vacío** | Mensaje contextual cuando no hay tareas o el filtro activo no produce resultados |
-| **Responsive** | Grid fluido: 3 columnas (≥900px) → 2 columnas (≥560px) → 1 columna |
+| Comando | Descripción |
+|---|---|
+| `npm start` | Servidor de desarrollo en `localhost:4200` |
+| `npm run build` | Build de producción en `dist/` |
+| `npm run watch` | Build en modo observación (desarrollo) |
+| `npm test` | Pruebas unitarias con Karma |
 
 ---
 
 ## Arquitectura
 
-El frontend aplica **Arquitectura Hexagonal**, separando el dominio de negocio, la lógica de aplicación, la infraestructura HTTP y la presentación visual.
-
-### Principio de Dependencias
+El proyecto aplica **Arquitectura Hexagonal (Ports & Adapters)** al frontend Angular. La dirección de dependencias es estricta:
 
 ```
-presentation  →  application use cases  →  ports (interfaces)
-infrastructure                           →  ports (implementa)
-domain                                   →  nada externo
+presentation → application → domain
+infrastructure → application / domain
+domain → (sin dependencias externas)
 ```
 
-Los componentes de UI nunca llaman directamente a `HttpClient`. Solo acceden al `TaskFacade`, que vive en presentación y delega en casos de uso pequeños. Los casos de uso dependen de la interfaz `TaskRepositoryPort`, no de la implementación HTTP concreta.
+### Capas
 
-### Las Cuatro Capas
+| Capa | Responsabilidad |
+|---|---|
+| `domain` | Entidades, value objects, enums y errores de dominio. Sin dependencias de Angular ni librerías externas. |
+| `application` | Casos de uso, comandos, queries y el puerto `TaskRepositoryPort`. Orquesta la lógica sin acoplarse a infraestructura. |
+| `infrastructure` | Implementa el puerto con `HttpClient`. Incluye DTOs, mapper y token de inyección. |
+| `presentation` | Componentes standalone, páginas, `TaskFacade` y view-models. La UI nunca llama directamente a `HttpClient`. |
+| `shared` | Servicios transversales (`NotificationService`). |
+| `app.config.ts` | Composition root de Angular: registra el repositorio concreto contra el puerto. |
 
-**1. Domain** (`src/app/domain/`)
-
-Contiene la entidad de negocio, modelos y enums. Sin dependencias de Angular.
-
-- `task.entity.ts` — entidad con reglas de validación y cambios de estado.
-- `task.model.ts` — interfaces `Task`, `CreateTaskPayload` y `UpdateTaskPayload`.
-- `task-status.enum.ts` — enum `TaskStatus` sin etiquetas visuales.
-
-**2. Application** (`src/app/application/`)
-
-Define los contratos y casos de uso de aplicación.
-
-- `task-repository.port.ts` — interfaz `TaskRepositoryPort`. Define qué operaciones necesita la app sin saber cómo se implementan. También define el tipo `PagedTaskResult` para las respuestas paginadas.
-- `*.use-case.ts` — casos de uso independientes para listar, crear, actualizar, eliminar y cambiar estado.
-
-**3. Infrastructure** (`src/app/infrastructure/`)
-
-Implementación concreta del puerto de datos.
-
-- `task-http.repository.ts` — implementa `TaskRepositoryPort` usando `HttpClient`. Es el único archivo que conoce la URL de la API y los parámetros HTTP. Usa `HttpParams` para construir las queries de paginación.
-- `task-repository.token.ts` — token de Angular para conectar el puerto con su adaptador HTTP en el composition root.
-
-**4. Presentation** (`src/app/presentation/`)
-
-Componentes de UI standalone y estado de pantalla. Reciben datos a través de `input()` y comunican acciones hacia arriba con `output()`. Ningún componente inyecta `HttpClient` ni accede a la URL de la API.
-
-- `task.facade.ts` — estado reactivo de la pantalla con signals, filtros, loading, errores y notificaciones. Delega el negocio en los casos de uso.
-
-### Estado Reactivo — Signals vs RxJS
-
-| Mecanismo | Cuándo se usa |
-|-----------|---------------|
-| **Signals** | Estado de la lista de tareas, filtro activo, búsqueda, loading, hasMore, contadores |
-| **computed()** | `filteredTasks` (combina búsqueda + filtro de estado), contadores por estado |
-| **RxJS Observables** | Peticiones HTTP (`HttpClient`), debounce de 300ms en la búsqueda, delay de skeleton |
-| **effect()** | Sincronización entre señales (detectar fin de carga inicial para verificar si hace falta paginar) |
-
-### Flujo — Carga Inicial con Skeleton Loader
+### Flujo de datos
 
 ```
-ngOnInit()
-  → facade.loadTasks()
-    → loadingSignal = true       (task-list muestra 9 skeleton cards)
-    → taskRepository.findPaginated(1, 9).pipe(delay(5000))
-    → API REST: GET /tasks?page=1&limit=9
-    → tasksSignal = data         (9 cards reales reemplazan el skeleton)
-    → loadingSignal = false
-    → effect detecta fin de carga → checkInitialFit()
-      (si el contenido cabe en el viewport sin scroll → carga página 2)
-```
-
-### Flujo — Infinite Scroll
-
-```
-Usuario scrollea hacia el fondo
-  → onWindowScroll() detecta: scrollY + windowH ≥ docH - 280px
-    → facade.loadMoreTasks()
-      → loadingMoreSignal = true  (aparece spinner "Cargando más tareas...")
-      → taskRepository.findPaginated(nextPage, 9).pipe(delay(3000))
-      → API REST: GET /tasks?page=N&limit=9
-      → tasksSignal.update(existing → [...existing, ...newData])
-      → loadingMoreSignal = false
-      → hasMoreSignal = result.hasMore
-```
-
-### Flujo — Crear Tarea
-
-```
-Usuario → "+ Nueva tarea"
-  → tasks.component: formOpen.set(true), editingTask.set(null)
-  → task-form-modal: effect detecta open()=true → form.reset()
-  → Usuario completa el formulario y hace submit
-  → task-form-modal emite (saved) con CreateTaskPayload
-  → tasks.component → facade.createTask(payload)
-  → taskRepository.create(payload) → POST /tasks
-  → tasksSignal.update([newTask, ...tasks])
-  → notificationService.success() → toast 3 segundos
+Component → TaskFacade → UseCase → TaskRepositoryPort
+                                         ↓
+                                TaskHttpRepository (HttpClient)
 ```
 
 ---
 
-## Componentes
-
-### Árbol
+## Estructura del proyecto
 
 ```
-app-root
-├── app-star-field              → Canvas con partículas animadas (fondo global, fuera de NgZone)
-├── router-outlet               → Carga tasks.component lazy
-└── app-toast-notification      → Host global de notificaciones
+src/
+  app/
+    domain/
+      entities/
+        task.entity.ts          # Entidad Task (inmutable, factory methods)
+        task.entity.spec.ts
+      enums/
+        task-status.enum.ts     # pending | in_progress | done
+      errors/
+        domain-error.ts
+      models/
+        task.model.ts           # TaskPrimitives (DTO interno de dominio)
+      value-objects/
+        task-id.ts
+        task-title.ts           # Validación: 3-100 caracteres
+        task-description.ts     # Validación: máx. 500 caracteres
 
-tasks.component (página principal — inyecta TaskFacade)
-├── app-stats-counter           → 4 contadores numéricos (computed signals)
-├── app-status-filter-bar       → Tabs de filtro por estado
-├── app-search-bar              → Input con debounce 300ms
-├── app-task-list               → Grid con skeleton / cards / estado vacío + infinite scroll
-│   └── app-task-item           → Card individual glassmorphism + acciones
-│       └── app-task-status-badge → Badge presentacional del estado
-├── app-task-form-modal         → Modal crear / editar (ReactiveForm)
-└── app-confirm-modal           → Confirmación antes de eliminar
-```
+    application/
+      models/
+        task-use-case.models.ts # Comandos, queries y tipos de resultado
+      ports/
+        task-repository.port.ts # Puerto outbound (interfaz)
+      use-cases/
+        list-tasks-page.use-case.ts
+        create-task.use-case.ts
+        update-task.use-case.ts
+        delete-task.use-case.ts
+        change-task-status.use-case.ts
+        change-task-status.use-case.spec.ts
 
-### Responsabilidades
+    infrastructure/
+      composition/
+        task-repository.token.ts  # InjectionToken para el puerto
+      dto/
+        task-api.dto.ts           # Shape de la respuesta de la API
+      mappers/
+        task-http.mapper.ts       # Traduce DTO ↔ TaskEntity
+        task-http.mapper.spec.ts
+      repositories/
+        task-http.repository.ts   # Implementación con HttpClient
 
-| Componente | Responsabilidad |
-|------------|-----------------|
-| `app-star-field` | Canvas 80 partículas conectadas por líneas. Corre con `NgZone.runOutsideAngular()` para no interferir con el change detection de Angular. |
-| `app-tasks` | Contenedor principal. Inyecta `TaskFacade`. Coordina los modales y delega todas las operaciones al facade. |
-| `app-stats-counter` | Recibe 4 valores numéricos vía `input()`. Sin lógica de estado. |
-| `app-status-filter-bar` | Tabs de filtro. Emite `filterChange` con el estado seleccionado. |
-| `app-search-bar` | Campo de búsqueda. Aplica debounce 300ms con RxJS. Emite `queryChange`. |
-| `app-task-list` | Grid 3-2-1 columnas. Muestra skeleton si `loading=true`, cards si hay tareas, mensaje vacío si no. Gestiona el window scroll para infinite scroll. |
-| `app-task-item` | Card de altura fija (280px). Muestra badge de estado, título, descripción y acciones. Emite `edit` y `delete`. |
-| `app-task-status-badge` | Badge visual. Solo recibe `status`. Sin lógica. |
-| `app-task-form-modal` | Modal con `ReactiveForm`. Validaciones inline. Se auto-limpia al abrirse con `effect()`. |
-| `app-confirm-modal` | Modal genérico. Recibe `title`, `message`, `confirmLabel`. Emite `confirmed` o `cancelled`. |
-| `app-toast-notification` | Muestra hasta 5 toasts simultáneos. Auto-dismiss en 3 segundos con animación de salida. |
+    presentation/
+      components/
+        confirm-modal/
+        loading-spinner/
+        search-bar/
+        star-field/               # Canvas con partículas animadas (fondo)
+        stats-counter/
+        status-filter-bar/
+        task-form-modal/
+        task-item/
+        task-list/
+        task-status-badge/
+        toast-notification/
+      pages/
+        tasks/                    # Página principal (contenedor)
+      state/
+        task.facade.ts            # Estado centralizado con Angular Signals
+      view-models/
+        task.view-model.ts
+        task-status-labels.ts
 
----
+    shared/
+      services/
+        notification.service.ts
 
-## Estructura de Carpetas
+    app.config.ts    # Composition root
+    app.routes.ts
 
-```
-Task_periferia_front/
-├── src/
-│   ├── app/
-│   │   ├── domain/                          # Sin dependencias de Angular ni librerías externas
-│   │   │   ├── entities/
-│   │   │   │   └── task.entity.ts           # Entidad con reglas de negocio
-│   │   │   ├── models/
-│   │   │   │   └── task.model.ts            # Interfaces Task, CreateTaskPayload, UpdateTaskPayload
-│   │   │   └── enums/
-│   │   │       └── task-status.enum.ts      # enum TaskStatus
-│   │   │
-│   │   ├── application/
-│   │   │   ├── ports/
-│   │   │   │   └── task-repository.port.ts  # Interfaz TaskRepositoryPort + PagedTaskResult
-│   │   │   └── use-cases/
-│   │   │       ├── list-tasks-page.use-case.ts
-│   │   │       ├── create-task.use-case.ts
-│   │   │       ├── update-task.use-case.ts
-│   │   │       ├── delete-task.use-case.ts
-│   │   │       └── change-task-status.use-case.ts
-│   │   │
-│   │   ├── infrastructure/
-│   │   │   ├── composition/
-│   │   │   │   └── task-repository.token.ts # InjectionToken TASK_REPOSITORY
-│   │   │   └── repositories/
-│   │   │       └── task-http.repository.ts  # Implementa TaskRepositoryPort con HttpClient - Servicio de infraestructura
-│   │   │
-│   │   ├── presentation/
-│   │   │   ├── pages/
-│   │   │   │   └── tasks/
-│   │   │   │       ├── tasks.component.ts   # Página principal, inyecta facade, coordina eventos
-│   │   │   │       ├── tasks.component.html # Template: header, stats, filtros, grid, modales
-│   │   │   │       └── tasks.component.scss # Layout page, navbar sticky glassmorphism
-│   │   │   ├── state/
-│   │   │   │   └── task.facade.ts           # Estado reactivo de pantalla
-│   │   │   ├── view-models/
-│   │   │   │   └── task-status-labels.ts    # Labels visuales de estados
-│   │   │   └── components/
-│   │   │       ├── star-field/              # Canvas de partículas — fondo animado global
-│   │   │       ├── task-list/               # Grid 3-2-1 cols, skeleton loader, infinite scroll
-│   │   │       ├── task-item/               # Card glassmorphism 280px de altura
-│   │   │       ├── task-form-modal/         # Modal crear/editar con ReactiveForm y validaciones
-│   │   │       ├── task-status-badge/       # Badge presentacional del estado
-│   │   │       ├── status-filter-bar/       # Tabs Todos/Pendientes/En progreso/Completadas
-│   │   │       ├── stats-counter/           # 4 contadores por estado
-│   │   │       ├── search-bar/              # Input con debounce 300ms
-│   │   │       ├── confirm-modal/           # Modal de confirmación genérico (eliminar)
-│   │   │       ├── loading-spinner/         # Spinner de carga (uso opcional)
-│   │   │       └── toast-notification/      # Toasts de éxito y error con auto-dismiss
-│   │   │
-│   │   ├── shared/
-│   │   │   └── services/
-│   │   │       └── notification.service.ts  # Signal con cola de toasts, push/dismiss -- Servicio de notificaciones
-│   │   │
-│   │   ├── app.component.ts                 # Raíz: star-field + router-outlet + toast host
-│   │   ├── app.config.ts                    # provideHttpClient, provideRouter, TASK_REPOSITORY DI
-│   │   └── app.routes.ts                    # Ruta lazy: '' → TasksComponent
-│   │
-│   ├── environments/
-│   │   └── environment.ts                   # { apiUrl: 'http://localhost:3000' }
-│   │
-│   ├── styles/
-│   │   ├── _variables.scss                  # CSS Custom Properties (tokens de color, tipografía, sombras)
-│   │   ├── _reset.scss                      # Normalización de box-model y márgenes
-│   │   ├── _typography.scss                 # Fuente base, text-rendering, clases de texto
-│   │   ├── _animations.scss                 # Keyframes globales: fade-in, fade-in-up, slide-up
-│   │   └── styles.scss                      # Importa partials y define el fondo degradado global
-│   │
-│   ├── index.html
-│   └── main.ts
-│
-├── angular.json
-├── package.json
-├── tsconfig.json
-└── README.md
+  environments/
+    environment.ts
+    environment.development.ts
+
+  styles/            # Variables SCSS globales, reset y animaciones
 ```
 
 ---
 
-## Design System
+## Componentes principales
 
-El sistema de diseño está definido en `src/styles/_variables.scss` mediante **CSS Custom Properties**. Todos los componentes consumen estos tokens — ningún valor de color, sombra o radio está hardcodeado en los estilos de componente.
+| Componente | Descripción |
+|---|---|
+| `tasks.page` | Contenedor principal. Inyecta `TaskFacade` y compone el layout. |
+| `task-list` | Grid responsivo de cards. Recibe tareas via `@Input` y emite acciones. |
+| `task-item` | Card individual: título, descripción, badge de status, fecha y acciones. |
+| `task-form-modal` | Formulario Reactivo de crear/editar con validaciones inline. |
+| `task-status-badge` | Badge presentacional del estado de la tarea. |
+| `status-filter-bar` | Tabs de filtro: All / Pending / In Progress / Done. |
+| `stats-counter` | Contadores calculados con `computed` signals: total, pending, in_progress, done. |
+| `search-bar` | Búsqueda con debounce de 300 ms. |
+| `confirm-modal` | Confirmación antes de eliminar una tarea. |
+| `loading-spinner` | Indicador de carga overlay. |
+| `toast-notification` | Mensajes de éxito y error con auto-dismiss y slide-in. |
+| `star-field` | Canvas con partículas animadas conectadas tipo network graph (fondo). |
 
-### Tokens Principales
+---
 
-```scss
-:root {
-  /* Fondos */
-  --bg-primary:  #07070e;
-  --bg-card:     rgba(18, 16, 32, 0.70);   /* glassmorphism */
-  --bg-nav:      rgba(15, 13, 26, 0.85);   /* navbar sticky */
+## Estado con Angular Signals
 
-  /* Acento */
-  --accent:       #7c3aed;
-  --accent-hover: #6d28d9;
-  --accent-glow:  rgba(124, 58, 237, 0.30);
+`TaskFacade` centraliza todo el estado de la aplicación usando signals de Angular 18:
 
-  /* Estados semánticos */
-  --status-pending:     #6b7280;
-  --status-in-progress: #f59e0b;
-  --status-done:        #10b981;
+```typescript
+// Señales de escritura (privadas)
+private readonly tasksSignal    = signal<TaskViewModel[]>([]);
+private readonly loadingSignal  = signal(false);
+private readonly errorSignal    = signal<string | null>(null);
+private readonly statusFilterSignal = signal<TaskStatus | 'all'>('all');
 
-  /* Texto */
-  --text-primary:   #ffffff;
-  --text-secondary: #c8d4e6;
-  --text-muted:     #a5bddf;
-
-  /* Radios */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-
-  /* Glassmorphism */
-  --blur-nav:  blur(12px);
-  --blur-card: blur(16px);
-}
+// Señales derivadas (computed, solo lectura)
+readonly filteredTasks  = computed(() => { /* búsqueda + filtro */ });
+readonly totalTasks     = computed(() => this.totalSignal());
+readonly pendingTasks   = computed(() => /* filter pending */);
+readonly inProgressTasks = computed(() => /* filter in_progress */);
+readonly doneTasks      = computed(() => /* filter done */);
 ```
 
-### Tipografía
+---
 
-- **Fuente**: `Inter` → `system-ui` (fallback)
-- **Tamaño base**: `14px`
-- **Pesos**: 400 (body), 500 (labels), 600 (títulos y botones)
-- Sin serifa. `text-rendering: optimizeLegibility`.
+## API consumida
 
-### Animaciones
+Base URL: `http://localhost:3000`
 
-| Animación | Uso |
-|-----------|-----|
-| `fade-in-up` | Cards al aparecer, modales |
-| `shimmer` | Efecto de barrido en skeleton cards |
-| `ring-spin` | Spinner del indicador "Cargando más" |
-| `slide-up` + `slide-out` | Entrada y salida de toasts |
-| `requestAnimationFrame` | Partículas del canvas (fuera de NgZone) |
+| Acción | Método | Endpoint |
+|---|---|---|
+| Listar tareas (paginado) | `GET` | `/tasks?page={n}&limit={n}` |
+| Obtener tarea | `GET` | `/tasks/{id}` |
+| Crear tarea | `POST` | `/tasks` |
+| Actualizar tarea | `PUT` | `/tasks/{id}` |
+| Eliminar tarea | `DELETE` | `/tasks/{id}` |
+
+### Modelo de tarea
+
+```typescript
+type TaskStatus = "pending" | "in_progress" | "done";
+
+type Task = {
+  id: string;          // UUID generado por el backend
+  title: string;       // Requerido, 3–100 caracteres
+  description?: string; // Opcional, máx. 500 caracteres
+  status: TaskStatus;  // Default: "pending"
+  createdAt: string;   // ISO 8601, generado por el backend
+  updatedAt: string;   // ISO 8601, actualizado por el backend
+};
+```
+
+---
+
+## Pruebas
+
+Las pruebas cubren:
+
+- **Dominio**: `task.entity.spec.ts` — rehydrate, validaciones de value objects.
+- **Aplicación**: `change-task-status.use-case.spec.ts` — lógica de caso de uso con repositorio mockeado.
+- **Infraestructura**: `task-http.mapper.spec.ts` — traducción DTO ↔ entidad de dominio.
+
+```bash
+# Ejecutar todas las pruebas en modo headless
+npm test -- --watch=false --browsers=ChromeHeadless
+```
+
+---
+
+## Design system
+
+La UI sigue el sistema de diseño definido para el proyecto:
+
+- **Fondo**: `#0a0a0f` con canvas animado de partículas conectadas.
+- **Acento**: `#7c3aed` (violeta) con glow en hover.
+- **Cards**: glassmorphism con border violeta, elevación en hover.
+- **Grid**: 3 columnas en desktop, 2 en tablet, 1 en mobile.
+- **Tipografía**: Space Grotesk / Inter, pesos 400/500/600.
+- **Estados**: `pending` gris · `in_progress` ámbar · `done` verde esmeralda.
+
+---
+
+## Dependencias
+
+### Producción
+
+| Paquete | Versión |
+|---|---|
+| `@angular/core` | ^18.1.0 |
+| `@angular/forms` | ^18.1.0 |
+| `@angular/router` | ^18.1.0 |
+| `rxjs` | ~7.8.0 |
+| `zone.js` | ~0.14.3 |
+
+### Desarrollo
+
+| Paquete | Versión |
+|---|---|
+| `@angular/cli` | ^18.1.2 |
+| `typescript` | ~5.5.2 |
+| `karma` | ~6.4.0 |
+| `jasmine-core` | ~5.1.0 |
+
+---
+
+## Licencia
+
+Uso privado — prueba técnica.

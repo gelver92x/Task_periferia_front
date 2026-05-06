@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 
 import { TaskStatus } from '../../../domain/enums/task-status.enum';
-import { Task } from '../../../domain/models/task.model';
+import { TaskViewModel } from '../../view-models/task.view-model';
 import { TaskStatusBadgeComponent } from '../task-status-badge/task-status-badge.component';
 
 @Component({
@@ -13,10 +13,10 @@ import { TaskStatusBadgeComponent } from '../task-status-badge/task-status-badge
   styleUrl: './task-item.component.scss',
 })
 export class TaskItemComponent {
-  readonly task   = input.required<Task>();
-  readonly edit   = output<Task>();
-  readonly delete = output<Task>();
-  readonly statusChange = output<{ task: Task; status: TaskStatus }>();
+  readonly task   = input.required<TaskViewModel>();
+  readonly edit   = output<TaskViewModel>();
+  readonly delete = output<TaskViewModel>();
+  readonly statusChange = output<{ task: TaskViewModel; status: TaskStatus }>();
 
   protected readonly statuses = Object.values(TaskStatus);
 

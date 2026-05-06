@@ -1,14 +1,10 @@
 import { PagedTaskResult, TaskRepositoryPort } from '../ports/task-repository.port';
-
-export type ListTasksPageInput = {
-  page: number;
-  limit: number;
-};
+import { ListTasksPageQuery, PagedTasksResult } from '../models/task-use-case.models';
 
 export class ListTasksPageUseCase {
   constructor(private readonly taskRepository: TaskRepositoryPort) {}
 
-  execute(input: ListTasksPageInput): Promise<PagedTaskResult> {
+  async execute(input: ListTasksPageQuery): Promise<PagedTasksResult> {
     if (!Number.isInteger(input.page) || input.page < 1) {
       throw new Error('Page must be a positive integer.');
     }
@@ -17,6 +13,11 @@ export class ListTasksPageUseCase {
       throw new Error('Limit must be a positive integer.');
     }
 
-    return this.taskRepository.findPaginated(input.page, input.limit);
+    const result: PagedTaskResult = await this.taskRepository.findPaginated(input.page, input.limit);
+
+    return {
+      ...result,
+      data: result.data.map((task) => task.toPrimitives()),
+    };
   }
 }

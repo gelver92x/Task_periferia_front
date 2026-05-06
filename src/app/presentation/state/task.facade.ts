@@ -6,8 +6,8 @@ import { DeleteTaskUseCase } from '../../application/use-cases/delete-task.use-c
 import { ListTasksPageUseCase } from '../../application/use-cases/list-tasks-page.use-case';
 import { UpdateTaskUseCase } from '../../application/use-cases/update-task.use-case';
 import { TaskStatus } from '../../domain/enums/task-status.enum';
-import { CreateTaskPayload, Task, UpdateTaskPayload } from '../../domain/models/task.model';
 import { NotificationService } from '../../shared/services/notification.service';
+import { TaskFormValue, TaskViewModel } from '../view-models/task.view-model';
 
 const PAGE_SIZE = 9;
 const INITIAL_LOADING_DELAY_MS = 2000;
@@ -22,7 +22,7 @@ export class TaskFacade {
   private readonly changeTaskStatusUseCase = inject(ChangeTaskStatusUseCase);
   private readonly notificationService = inject(NotificationService);
 
-  private readonly tasksSignal = signal<Task[]>([]);
+  private readonly tasksSignal = signal<TaskViewModel[]>([]);
   private readonly loadingSignal = signal(false);
   private readonly loadingMoreSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
@@ -97,10 +97,10 @@ export class TaskFacade {
     void this.runLoadMoreRequest();
   }
 
-  createTask(payload: CreateTaskPayload): void {
+  createTask(formValue: TaskFormValue): void {
     void this.runRequest(
       async () => {
-        const task = await this.createTaskUseCase.execute(payload);
+        const task = await this.createTaskUseCase.execute(formValue);
         this.tasksSignal.update((tasks) => [task, ...tasks]);
         this.totalSignal.update((total) => total + 1);
         this.notificationService.success('Tarea creada.');
@@ -109,10 +109,10 @@ export class TaskFacade {
     );
   }
 
-  updateTask(id: string, payload: UpdateTaskPayload): void {
+  updateTask(id: string, formValue: TaskFormValue): void {
     void this.runRequest(
       async () => {
-        const updated = await this.updateTaskUseCase.execute(id, payload);
+        const updated = await this.updateTaskUseCase.execute({ id, ...formValue });
         this.replaceTask(updated);
         this.notificationService.success('Tarea actualizada.');
       },
@@ -123,7 +123,7 @@ export class TaskFacade {
   deleteTask(id: string): void {
     void this.runRequest(
       async () => {
-        await this.deleteTaskUseCase.execute(id);
+        await this.deleteTaskUseCase.execute({ taskId: id });
         this.tasksSignal.update((tasks) => tasks.filter((task) => task.id !== id));
         this.totalSignal.update((total) => Math.max(0, total - 1));
         this.notificationService.success('Tarea eliminada.');
@@ -132,10 +132,10 @@ export class TaskFacade {
     );
   }
 
-  changeTaskStatus(task: Task, status: TaskStatus): void {
+  changeTaskStatus(task: TaskViewModel, status: TaskStatus): void {
     void this.runRequest(
       async () => {
-        const updated = await this.changeTaskStatusUseCase.execute(task, status);
+        const updated = await this.changeTaskStatusUseCase.execute({ taskId: task.id, status });
         this.replaceTask(updated);
         this.notificationService.success('Tarea actualizada.');
       },
@@ -192,7 +192,7 @@ export class TaskFacade {
     }
   }
 
-  private replaceTask(updatedTask: Task): void {
+  private replaceTask(updatedTask: TaskViewModel): void {
     this.tasksSignal.update((tasks) =>
       tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
     );

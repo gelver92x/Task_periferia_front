@@ -2,7 +2,7 @@ import { Component, effect, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TaskStatus } from '../../../domain/enums/task-status.enum';
-import { CreateTaskPayload, Task, UpdateTaskPayload } from '../../../domain/models/task.model';
+import { TaskFormValue, TaskViewModel } from '../../view-models/task.view-model';
 
 @Component({
   selector: 'app-task-form-modal',
@@ -13,8 +13,8 @@ import { CreateTaskPayload, Task, UpdateTaskPayload } from '../../../domain/mode
 })
 export class TaskFormModalComponent {
   readonly open = input(false);
-  readonly task = input<Task | null>(null);
-  readonly saved = output<CreateTaskPayload | UpdateTaskPayload>();
+  readonly task = input<TaskViewModel | null>(null);
+  readonly saved = output<TaskFormValue>();
   readonly cancelled = output<void>();
 
   protected readonly statuses = Object.values(TaskStatus);

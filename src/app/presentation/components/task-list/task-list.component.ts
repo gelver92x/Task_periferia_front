@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 
 import { TaskStatus } from '../../../domain/enums/task-status.enum';
-import { Task } from '../../../domain/models/task.model';
+import { TaskViewModel } from '../../view-models/task.view-model';
 import { TaskItemComponent } from '../task-item/task-item.component';
 
 @Component({
@@ -21,15 +21,15 @@ import { TaskItemComponent } from '../task-item/task-item.component';
 })
 export class TaskListComponent implements AfterViewInit, OnDestroy {
   // ── Inputs ────────────────────────────────────────────────────────
-  readonly tasks       = input.required<Task[]>();
+  readonly tasks       = input.required<TaskViewModel[]>();
   readonly loading     = input(false);
   readonly loadingMore = input(false);
   readonly hasMore     = input(false);
 
   // ── Outputs ───────────────────────────────────────────────────────
-  readonly edit         = output<Task>();
-  readonly delete       = output<Task>();
-  readonly statusChange = output<{ task: Task; status: TaskStatus }>();
+  readonly edit         = output<TaskViewModel>();
+  readonly delete       = output<TaskViewModel>();
+  readonly statusChange = output<{ task: TaskViewModel; status: TaskStatus }>();
   readonly loadMore     = output<void>();
 
   /** 9 slots para skeleton 3×3 */

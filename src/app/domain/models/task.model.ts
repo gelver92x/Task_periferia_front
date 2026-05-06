@@ -1,6 +1,6 @@
 import { TaskStatus } from '../enums/task-status.enum';
 
-export interface Task {
+export interface TaskPrimitives {
   id: string;
   title: string;
   description: string;
@@ -8,12 +8,3 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
 }
-
-export type CreateTaskPayload = {
-  title: string;
-  description?: string;
-  status?: TaskStatus;
-};
-
-export type UpdateTaskPayload = Partial<Pick<Task, 'title' | 'description' | 'status'>>;
-
